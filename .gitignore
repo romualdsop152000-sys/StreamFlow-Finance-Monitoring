@@ -10,6 +10,7 @@ build/
 # Virtual env
 venv/
 .venv/
+*-venv/
 
 # Data Lake outputs (keep structure via .gitkeep)
 data/**/*
@@ -22,3 +23,6 @@ logs/**/*
 # OS / IDE
 .DS_Store
 .vscode/
+
+# sensitive information
+.env

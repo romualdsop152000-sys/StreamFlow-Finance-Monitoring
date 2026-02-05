@@ -52,7 +52,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="End-to-end Data Lake pipeline: Binance + NDX -> Spark -> Postgres -> dbt -> Elastic",
     start_date=datetime(2026, 1, 1),
-    schedule="*/1 * * * *",  # toutes les minutes (bonus realtime)
+    schedule="*/5 * * * *",  # toutes les minutes (bonus realtime)
     catchup=False,
     max_active_runs=1,
     tags=["bigdata", "datalake", "spark", "dbt", "postgres", "elastic"],
@@ -62,7 +62,7 @@ with DAG(
 
     # 1) Ingestion (REST API) — Source 1 (toi)
     t_ingest_binance = PythonOperator(
-        task_id="ingest_binance_btcusdt_1m",
+        task_id="ingest_binance_btcusdt_5m",
         python_callable=ingest_binance_btcusdt,
     )
 
