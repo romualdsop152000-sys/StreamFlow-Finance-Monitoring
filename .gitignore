@@ -25,4 +25,4 @@ logs/**/*
 .vscode/
 
 # sensitive information
-.env
+.envProject/
