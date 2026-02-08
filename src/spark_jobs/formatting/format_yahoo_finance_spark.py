@@ -1,6 +1,9 @@
 import argparse
+import os
 from pathlib import Path
 
+import pyarrow as pa
+import pyarrow.parquet as pq
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
@@ -59,12 +62,19 @@ def main(execution_date: str):
         .orderBy("ts_minute_utc")
     )
 
-    Path(out_path).mkdir(parents=True, exist_ok=True)
-
-    (df2.write
-        .mode("overwrite")
-        .parquet(out_path)
-    )
+    # Utilise pandas+pyarrow pour contourner les problèmes de permissions Hadoop sur WSL
+    os.makedirs(out_path, exist_ok=True)
+    
+    pdf = df2.toPandas()
+    table = pa.Table.from_pandas(pdf)
+    parquet_file = os.path.join(out_path, "data.parquet")
+    # Utiliser microseconds pour compatibilité avec Spark
+    pq.write_table(table, parquet_file, coerce_timestamps='us', allow_truncated_timestamps=True)
+    
+    # Créer le fichier _SUCCESS
+    success_file = os.path.join(out_path, "_SUCCESS")
+    with open(success_file, "w") as f:
+        pass
 
     print(f"[OK] Wrote formatted parquet to: {out_path}")
     spark.stop()

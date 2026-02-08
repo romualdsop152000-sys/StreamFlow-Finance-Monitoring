@@ -1,5 +1,7 @@
 import argparse
 import os
+import pyarrow as pa
+import pyarrow.parquet as pq
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, LongType, TimestampType
@@ -129,16 +131,25 @@ def format_dataframe(df):
 
 def write_formatted_data(df, dt: str):
     """
-    Écrit les données formatées en Parquet partitionné.
+    Écrit les données formatées en Parquet.
+    Utilise pandas+pyarrow pour contourner les problèmes de permissions Hadoop sur WSL.
     """
     output_path = f"data/formatted/finance/crypto/binance/btc_usdt/dt={dt}"
     
-    # Créer le répertoire parent si nécessaire
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    # Créer le répertoire de sortie
+    os.makedirs(output_path, exist_ok=True)
     
-    df.write \
-        .mode("overwrite") \
-        .parquet(output_path)
+    # Convertir Spark DataFrame en pandas puis écrire avec pyarrow
+    pdf = df.toPandas()
+    table = pa.Table.from_pandas(pdf)
+    parquet_file = os.path.join(output_path, "data.parquet")
+    # Utiliser microseconds pour compatibilité avec Spark
+    pq.write_table(table, parquet_file, coerce_timestamps='us', allow_truncated_timestamps=True)
+    
+    # Créer le fichier _SUCCESS pour indiquer la fin du job
+    success_file = os.path.join(output_path, "_SUCCESS")
+    with open(success_file, "w") as f:
+        pass
     
     print(f"[OK] Wrote formatted data to {output_path}")
     return output_path

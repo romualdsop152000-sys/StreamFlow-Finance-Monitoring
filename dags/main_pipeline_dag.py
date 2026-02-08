@@ -7,12 +7,17 @@ from airflow.operators.bash import BashOperator
 
 
 # -------------------------
-# Config (à adapter ensuite)
 # -------------------------
-PROJECT_ROOT = "/opt/airflow"  # si vous utilisez docker airflow standard
+PROJECT_ROOT = "/opt/airflow" 
 PYTHON = "python3"
 SPARK_SUBMIT = "spark-submit"
 DBT_DIR = f"{PROJECT_ROOT}/dbt/btc_leadlag_dbt"
+
+# Config Spark pour éviter les problèmes de chmod sur Windows/WSL
+SPARK_CONF = (
+    '--conf "spark.hadoop.fs.permissions.enabled=false" '
+    '--conf "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs=false" '
+)
 
 DEFAULT_ARGS = {
     "owner": "datalake_team",
@@ -72,7 +77,7 @@ with DAG(
         task_id="spark_format_binance",
         bash_command=(
             f"cd {PROJECT_ROOT} && "
-            f"{SPARK_SUBMIT} src/spark_jobs/formatting/format_binance_spark.py "
+            f"{SPARK_SUBMIT} {SPARK_CONF} src/spark_jobs/formatting/format_binance_spark.py "
             f"--execution_date '{{{{ ds }}}}'"
         ),
     )
@@ -81,7 +86,7 @@ with DAG(
         task_id="spark_format_yahoo",
         bash_command=(
             f"cd {PROJECT_ROOT} && "
-            f"{SPARK_SUBMIT} src/spark_jobs/formatting/format_yahoo_spark.py "
+            f"{SPARK_SUBMIT} {SPARK_CONF} src/spark_jobs/formatting/format_yahoo_finance_spark.py "
             f"--execution_date '{{{{ ds }}}}'"
         ),
     )
@@ -91,7 +96,7 @@ with DAG(
         task_id="spark_join_and_features",
         bash_command=(
             f"cd {PROJECT_ROOT} && "
-            f"{SPARK_SUBMIT} src/spark_jobs/combination/features_lead_lag_spark.py "
+            f"{SPARK_SUBMIT} {SPARK_CONF} src/spark_jobs/combination/features_lead_lag_spark.py "
             f"--execution_date '{{{{ ds }}}}'"
         ),
     )
@@ -101,7 +106,7 @@ with DAG(
         task_id="spark_export_to_postgres",
         bash_command=(
             f"cd {PROJECT_ROOT} && "
-            f"{SPARK_SUBMIT} src/spark_jobs/export/load_to_warehouse.py "
+            f"{SPARK_SUBMIT} {SPARK_CONF} src/spark_jobs/export/load_to_warehouse.py "
             f"--execution_date '{{{{ ds }}}}'"
         ),
     )

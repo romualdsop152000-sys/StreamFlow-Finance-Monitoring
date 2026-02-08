@@ -1,5 +1,7 @@
 import argparse
 import os
+import pyarrow as pa
+import pyarrow.parquet as pq
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
@@ -84,9 +86,19 @@ def main(execution_date: str, max_lag_minutes: int = 5):
     print(f"[INFO] Sample data:")
     joined.show(5, truncate=False)
 
-    # Écrire les résultats
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    joined.write.mode("overwrite").parquet(output_path)
+    # Écrire les résultats avec pandas+pyarrow (contourne les problèmes de permissions Hadoop sur WSL)
+    os.makedirs(output_path, exist_ok=True)
+    
+    pdf = joined.toPandas()
+    table = pa.Table.from_pandas(pdf)
+    parquet_file = os.path.join(output_path, "data.parquet")
+    # Utiliser microseconds pour compatibilité avec Spark
+    pq.write_table(table, parquet_file, coerce_timestamps='us', allow_truncated_timestamps=True)
+    
+    # Créer le fichier _SUCCESS
+    success_file = os.path.join(output_path, "_SUCCESS")
+    with open(success_file, "w") as f:
+        pass
     
     print(f"[SUCCESS] Wrote lead-lag features to {output_path}")
     
