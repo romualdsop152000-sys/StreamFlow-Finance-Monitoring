@@ -27,7 +27,7 @@ DEFAULT_ARGS = {
 # -------------------------
 def ingest_binance_btcusdt(**context):
     """
-    Appelle le script d’ingestion Binance (source 1).
+    Appelle le script d'ingestion Binance (source 1).
     On garde le wrapper pour que ce soit clair/maintenable.
     """
     # Import local (évite des soucis de paths au parse du DAG)
@@ -35,13 +35,9 @@ def ingest_binance_btcusdt(**context):
     run(symbol="BTCUSDT")
 
 
-def ingest_yahoo_ndx_placeholder(**context):
-    """
-    Placeholder pour le binôme (source 2).
-    À remplacer par: from src.ingestion.yahoo_ndx import run ; run()
-    """
-    # Pour l’instant, on ne fait rien.
-    return
+def ingest_yahoo_finance_ndaq(**context):
+    from src.ingestion.yahoo_finance import run
+    run()
 
 
 # -------------------------
@@ -52,7 +48,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="End-to-end Data Lake pipeline: Binance + NDX -> Spark -> Postgres -> dbt -> Elastic",
     start_date=datetime(2026, 1, 1),
-    schedule="*/5 * * * *",  # toutes les minutes (bonus realtime)
+    schedule="*/5 * * * *",  # toutes les 5 minutes (bonus realtime)
     catchup=False,
     max_active_runs=1,
     tags=["bigdata", "datalake", "spark", "dbt", "postgres", "elastic"],
@@ -66,15 +62,12 @@ with DAG(
         python_callable=ingest_binance_btcusdt,
     )
 
-    # 1bis) Ingestion — Source 2 (binôme)
-    # Le binôme remplacera ce placeholder par son vrai job ingestion Yahoo Finance ^NDX.
     t_ingest_yahoo = PythonOperator(
-        task_id="ingest_yahoo_ndx_1m",
-        python_callable=ingest_yahoo_ndx_placeholder,
+        task_id="ingest_yahoo_ndaq_5m",
+        python_callable=ingest_yahoo_finance_ndaq,
     )
 
-    # 2) Formatting (Spark) — placeholders (à remplir après Option A)
-    # Exemple: spark_jobs/formatting/format_binance_spark.py
+    # 2) Formatting (Spark)
     t_format_binance = BashOperator(
         task_id="spark_format_binance",
         bash_command=(
