@@ -1,4 +1,5 @@
 services:
+  # ========== Base de données Airflow ==========
   postgres:
     image: postgres:13
     container_name: airflow-postgres
@@ -8,70 +9,141 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
     restart: unless-stopped
 
+  # ========== Data Warehouse PostgreSQL ==========
+  postgres-warehouse:
+    image: postgres:13
+    container_name: datalake-warehouse
+    environment:
+      POSTGRES_USER: datalake_user
+      POSTGRES_PASSWORD: datalake_pass
+      POSTGRES_DB: datalake
+    volumes:
+      - postgres_warehouse:/var/lib/postgresql/data
+      - ./init-warehouse.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "datalake_user", "-d", "datalake"]
+      interval: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # ========== pgAdmin - Interface PostgreSQL ==========
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-warehouse
+    restart: unless-stopped
+
+  # ========== Elasticsearch ==========
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      retries: 5
+    restart: unless-stopped
+
+  # ========== Airflow Webserver ==========
   airflow-webserver:
     build:
-      context: .
-      dockerfile: airflow/Dockerfile
+      context: ..
+      dockerfile: docker/airflow/Dockerfile
     container_name: airflow-webserver
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      postgres-warehouse:
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__CORE__FERNET_KEY: ""
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
-      # Important pour imports python (src.*)
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
       PYTHONPATH: /opt/airflow
+      POSTGRES_HOST: postgres-warehouse
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: datalake
+      POSTGRES_USER: datalake_user
+      POSTGRES_PASSWORD: datalake_pass
+      ELASTICSEARCH_HOST: elasticsearch
+      ELASTICSEARCH_PORT: "9200"
     volumes:
       - ../dags:/opt/airflow/dags
       - ../src:/opt/airflow/src
       - ../data:/opt/airflow/data
       - ../dbt:/opt/airflow/dbt
-      - ../logs:/opt/airflow/logs
-      - airflow_plugins:/opt/airflow/plugins
+      - airflow_logs:/opt/airflow/logs
     ports:
-      - "8081:8080"
+      - "8082:8080"
     command: >
       bash -c "
-      airflow db migrate &&
-      airflow users create
-        --username airflow
-        --password airflow
-        --firstname Admin
-        --lastname Admin
-        --role Admin
-        --email admin@example.com || true &&
-      airflow webserver
+        airflow db migrate &&
+        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true &&
+        airflow webserver
       "
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     restart: unless-stopped
 
+  # ========== Airflow Scheduler ==========
   airflow-scheduler:
     build:
-      context: .
-      dockerfile: airflow/Dockerfile
+      context: ..
+      dockerfile: docker/airflow/Dockerfile
     container_name: airflow-scheduler
     depends_on:
-      - postgres
-      - airflow-webserver
+      airflow-webserver:
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__CORE__FERNET_KEY: ""
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__FERNET_KEY: ''
       PYTHONPATH: /opt/airflow
+      POSTGRES_HOST: postgres-warehouse
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: datalake
+      POSTGRES_USER: datalake_user
+      POSTGRES_PASSWORD: datalake_pass
+      ELASTICSEARCH_HOST: elasticsearch
+      ELASTICSEARCH_PORT: "9200"
     volumes:
       - ../dags:/opt/airflow/dags
       - ../src:/opt/airflow/src
       - ../data:/opt/airflow/data
       - ../dbt:/opt/airflow/dbt
-      - ../logs:/opt/airflow/logs
-      - airflow_plugins:/opt/airflow/plugins
-    command: scheduler
+      - airflow_logs:/opt/airflow/logs
+    command: airflow scheduler
     restart: unless-stopped
 
 volumes:
   postgres_db:
-  airflow_plugins:
+  postgres_warehouse:
+  elasticsearch_data:
+  airflow_logs:
