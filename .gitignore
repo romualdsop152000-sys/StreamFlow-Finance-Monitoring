@@ -26,3 +26,6 @@ logs/**/*
 
 # sensitive information
 .envProject/
+__pycache__/
+*.pyc
+.vscode/
