@@ -1,5 +1,6 @@
 import argparse
 import os
+from glob import glob
 import pyarrow as pa
 import pyarrow.parquet as pq
 from pyspark.sql import SparkSession
@@ -23,35 +24,43 @@ def get_spark_session():
 def read_raw_data(spark, dt: str):
     """
     Lit les données brutes depuis CSV, JSONL ou JSON.
+    Supporte les fichiers multiples avec wildcards.
     """
     base_path = "data/raw/finance/crypto/binance/btc_usdt"
     raw_dir = f"{base_path}/dt={dt}"
-    
-    csv_path = f"{raw_dir}/btc_usdt_1min.csv"
-    jsonl_path = f"{raw_dir}/btc_usdt_1min.jsonl"
-    json_path = f"{raw_dir}/btc_usdt_1min.json"
 
-    if os.path.exists(csv_path):
-        input_path = csv_path
+    # Check if directory exists
+    if not os.path.exists(raw_dir):
+        raise FileNotFoundError(
+            f"No raw input found for dt={dt}. Expected:\n"
+            f"  - {raw_dir}/*.csv\n"
+            f"  - {raw_dir}/*.jsonl\n"
+            f"  - {raw_dir}/*.json"
+        )
+
+    # Find files using glob patterns
+    json_files = glob(f"{raw_dir}/*.json")
+    jsonl_files = glob(f"{raw_dir}/*.jsonl")
+    csv_files = glob(f"{raw_dir}/*.csv")
+
+    if json_files:
+        print(f"[INFO] Reading {len(json_files)} JSON files from: {raw_dir}")
+        df = spark.read.option("multiLine", "true").json(f"{raw_dir}/*.json")
+    elif jsonl_files:
+        print(f"[INFO] Reading {len(jsonl_files)} JSONL files from: {raw_dir}")
+        df = spark.read.json(f"{raw_dir}/*.jsonl")
+    elif csv_files:
+        print(f"[INFO] Reading {len(csv_files)} CSV files from: {raw_dir}")
         df = spark.read \
             .option("header", "true") \
             .option("inferSchema", "true") \
-            .csv(input_path)
-        print(f"[INFO] Reading CSV from: {input_path}")
-    elif os.path.exists(jsonl_path):
-        input_path = jsonl_path
-        df = spark.read.json(input_path)
-        print(f"[INFO] Reading JSONL from: {input_path}")
-    elif os.path.exists(json_path):
-        input_path = json_path
-        df = spark.read.option("multiLine", "true").json(input_path)
-        print(f"[INFO] Reading JSON from: {input_path}")
+            .csv(f"{raw_dir}/*.csv")
     else:
         raise FileNotFoundError(
             f"No raw input found for dt={dt}. Expected:\n"
-            f"  - {csv_path}\n"
-            f"  - {jsonl_path}\n"
-            f"  - {json_path}"
+            f"  - {raw_dir}/*.csv\n"
+            f"  - {raw_dir}/*.jsonl\n"
+            f"  - {raw_dir}/*.json"
         )
 
     return df
@@ -60,40 +69,68 @@ def read_raw_data(spark, dt: str):
 def format_dataframe(df):
     """
     Applique les transformations de formatage sur le DataFrame.
+    - Renomme les colonnes pour correspondre au schéma attendu
     - Cast des colonnes numériques
     - Parsing des timestamps
     - Ajout de colonnes dérivées
     """
-    # Cast des colonnes numériques
-    df = df \
-        .withColumn("open", F.col("open").cast(DoubleType())) \
-        .withColumn("high", F.col("high").cast(DoubleType())) \
-        .withColumn("low", F.col("low").cast(DoubleType())) \
-        .withColumn("close", F.col("close").cast(DoubleType())) \
-        .withColumn("volume", F.col("volume").cast(DoubleType())) \
-        .withColumn("quote_asset_volume", F.col("quote_asset_volume").cast(DoubleType())) \
-        .withColumn("number_of_trades", F.col("number_of_trades").cast(LongType())) \
-        .withColumn("taker_buy_base_asset_volume", F.col("taker_buy_base_asset_volume").cast(DoubleType())) \
-        .withColumn("taker_buy_quote_asset_volume", F.col("taker_buy_quote_asset_volume").cast(DoubleType())) \
-        .withColumn("open_time_ms", F.col("open_time_ms").cast(LongType())) \
-        .withColumn("close_time_ms", F.col("close_time_ms").cast(LongType()))
+    # Renommer les colonnes pour correspondre au schéma attendu
+    column_mapping = {
+        "quote_volume": "quote_asset_volume",
+        "taker_buy_base": "taker_buy_base_asset_volume",
+        "taker_buy_quote": "taker_buy_quote_asset_volume",
+        "open_time": "open_time_ms",
+        "close_time": "close_time_ms",
+        "trades": "number_of_trades"
+    }
+    
+    for old_name, new_name in column_mapping.items():
+        if old_name in df.columns:
+            df = df.withColumnRenamed(old_name, new_name)
+    
+    # Cast des colonnes numériques (seulement si elles existent)
+    numeric_cols = {
+        "open": DoubleType(),
+        "high": DoubleType(),
+        "low": DoubleType(),
+        "close": DoubleType(),
+        "volume": DoubleType(),
+        "quote_asset_volume": DoubleType(),
+        "number_of_trades": LongType(),
+        "taker_buy_base_asset_volume": DoubleType(),
+        "taker_buy_quote_asset_volume": DoubleType(),
+        "open_time_ms": LongType(),
+        "close_time_ms": LongType()
+    }
+    
+    for col_name, col_type in numeric_cols.items():
+        if col_name in df.columns:
+            df = df.withColumn(col_name, F.col(col_name).cast(col_type))
 
-    # Parsing des timestamps UTC
-    df = df \
-        .withColumn("open_time_utc", F.to_timestamp("open_time_utc")) \
-        .withColumn("close_time_utc", F.to_timestamp("close_time_utc")) \
-        .withColumn("ts_minute_utc", F.to_timestamp("ts_minute_utc"))
+    # Créer les colonnes timestamp UTC à partir des millisecondes
+    if "open_time_ms" in df.columns:
+        df = df.withColumn("open_time_utc", (F.col("open_time_ms") / 1000).cast(TimestampType()))
+    if "close_time_ms" in df.columns:
+        df = df.withColumn("close_time_utc", (F.col("close_time_ms") / 1000).cast(TimestampType()))
+    
+    # Parser ts_minute_utc si présent
+    if "ts_minute_utc" in df.columns:
+        df = df.withColumn("ts_minute_utc", F.to_timestamp("ts_minute_utc"))
 
     # Colonnes dérivées
     df = df \
         .withColumn("price_range", F.col("high") - F.col("low")) \
         .withColumn("price_change", F.col("close") - F.col("open")) \
-        .withColumn("price_change_pct", 
-                    F.when(F.col("open") != 0, 
+        .withColumn("price_change_pct",
+                    F.when(F.col("open") != 0,
                            (F.col("close") - F.col("open")) / F.col("open") * 100)
                     .otherwise(0)) \
         .withColumn("is_bullish", F.col("close") > F.col("open")) \
         .withColumn("formatted_at_utc", F.current_timestamp())
+
+    # Ajouter source si manquant
+    if "source" not in df.columns:
+        df = df.withColumn("source", F.lit("binance"))
 
     # Réordonner les colonnes
     columns_order = [

@@ -38,7 +38,8 @@ def ingest_binance_btcusdt(**context):
     import sys
     sys.path.insert(0, PROJECT_ROOT)
     from src.ingestion.binance_btc_usdt import run
-    run(symbol="BTCUSDT")
+    execution_date = context['ds']  # Format: YYYY-MM-DD
+    run(symbol="BTCUSDT", dt=execution_date)
 
 
 def ingest_yahoo_finance_ndaq(**context):
@@ -46,7 +47,8 @@ def ingest_yahoo_finance_ndaq(**context):
     import sys
     sys.path.insert(0, PROJECT_ROOT)
     from src.ingestion.yahoo_finance import run
-    run()
+    execution_date = context['ds']  # Format: YYYY-MM-DD
+    run(dt=execution_date)
 
 
 # -------------------------

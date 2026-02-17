@@ -72,7 +72,7 @@ def normalize_klines(raw_klines: list, symbol: str = "BTCUSDT") -> list:
     
     return records
 
-def write_raw(records: list, base_dir: str = "data/raw/finance/crypto/binance/btc_usdt") -> str:
+def write_raw(records: list, base_dir: str = "data/raw/finance/crypto/binance/btc_usdt", dt: str = None) -> str:
     """
     Écrit les données brutes en JSON partitionné par date.
     """
@@ -80,7 +80,8 @@ def write_raw(records: list, base_dir: str = "data/raw/finance/crypto/binance/bt
         print("[WARNING] No records to write")
         return ""
     
-    dt = _utc_today_str()
+    if dt is None:
+        dt = _utc_today_str()
     output_dir = Path(base_dir) / f"dt={dt}"
     _ensure_dir(output_dir)
     
@@ -93,11 +94,16 @@ def write_raw(records: list, base_dir: str = "data/raw/finance/crypto/binance/bt
     print(f"[OK] Wrote {len(records)} records to {output_file}")
     return str(output_file)
 
-def run(symbol: str = "BTCUSDT", limit: int = 5):
+def run(symbol: str = "BTCUSDT", limit: int = 5, dt: str = None):
     """
     Point d'entrée principal pour l'ingestion Binance.
+    
+    Args:
+        symbol: Trading pair symbol
+        limit: Number of klines to fetch
+        dt: Target date partition (YYYY-MM-DD). Uses UTC today if None.
     """
-    print(f"[INFO] Fetching {limit} klines for {symbol}")
+    print(f"[INFO] Fetching {limit} klines for {symbol} (dt={dt or 'today'})")
     
     raw_klines = fetch_klines_1m(symbol=symbol, limit=limit)
     
@@ -109,7 +115,7 @@ def run(symbol: str = "BTCUSDT", limit: int = 5):
     
     records = normalize_klines(raw_klines, symbol=symbol)
     
-    path = write_raw(records)
+    path = write_raw(records, dt=dt)
     print(f"[SUCCESS] Ingestion complete: {path}")
 
 if __name__ == "__main__":

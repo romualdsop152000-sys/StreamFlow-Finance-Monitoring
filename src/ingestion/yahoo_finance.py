@@ -66,9 +66,15 @@ def fetch_ohlcv(ticker: str, period: str = "1d", interval: str = "1m", lag: int 
 
 
 def save_raw_data_locally(df_new: pd.DataFrame,
-                          raw_path: str = "data/raw/market/yfinance/nasdaq_100") -> str:
+                          raw_path: str = "data/raw/market/yfinance/nasdaq_100",
+                          dt: str = None) -> str:
     """
     Save raw data to CSV with intelligent append (dedup + sort).
+    
+    Args:
+        df_new: DataFrame with new data
+        raw_path: Base path for raw data
+        dt: Target date partition (YYYY-MM-DD). Uses UTC today if None.
     
     Returns:
         Path to saved file or empty string if no data
@@ -83,7 +89,8 @@ def save_raw_data_locally(df_new: pd.DataFrame,
         print("[WARNING] Missing 'datetime' column, skipping save")
         return ""
     
-    dt = _utc_today_str()
+    if dt is None:
+        dt = _utc_today_str()
     final_raw_path = Path(raw_path) / f"dt={dt}" / "nasdaq_ohlcv.csv"
     _ensure_dir(final_raw_path.parent)
     
@@ -111,11 +118,16 @@ def save_raw_data_locally(df_new: pd.DataFrame,
     return str(final_raw_path)
 
     
-def run(ticker: str = "NDAQ", lag_minutes: int = 5):
+def run(ticker: str = "NDAQ", lag_minutes: int = 5, dt: str = None):
     """
     Main entry point for NASDAQ ingestion.
+    
+    Args:
+        ticker: Symbol to fetch
+        lag_minutes: Number of recent records to keep
+        dt: Target date partition (YYYY-MM-DD). Uses UTC today if None.
     """
-    print(f"[INFO] Fetching {ticker} data (last {lag_minutes} minutes)")
+    print(f"[INFO] Fetching {ticker} data (last {lag_minutes} minutes, dt={dt or 'today'})")
     
     nasdaq_data = fetch_ohlcv(ticker, lag=lag_minutes)
     
@@ -126,7 +138,7 @@ def run(ticker: str = "NDAQ", lag_minutes: int = 5):
     print(f"[INFO] Fetched {len(nasdaq_data)} records")
     print(nasdaq_data)
     
-    path = save_raw_data_locally(nasdaq_data)
+    path = save_raw_data_locally(nasdaq_data, dt=dt)
     if path:
         print(f"[OK] Saved to {path}")
     else:
