@@ -20,5 +20,5 @@ RUN curl -fsSL https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spar
     && chown -R airflow:root ${SPARK_HOME}
 
 USER airflow
-COPY airflow/requirements.txt /requirements.txt
+COPY docker/airflow/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
