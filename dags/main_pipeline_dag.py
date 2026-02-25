@@ -118,22 +118,22 @@ with DAG(
     )
 
     # ========== 5) dbt : build marts + tests qualité ==========
-    t_dbt_run = BashOperator(
-        task_id="dbt_run",
-        bash_command=f"cd {DBT_DIR} && dbt run --profiles-dir .",
-    )
+    # t_dbt_run = BashOperator(
+    #     task_id="dbt_run",
+    #     bash_command=f"cd {DBT_DIR} && dbt run --profiles-dir .",
+    # )
 
-    t_dbt_test = BashOperator(
-        task_id="dbt_test",
-        bash_command=f"cd {DBT_DIR} && dbt test --profiles-dir .",
-    )
+    # t_dbt_test = BashOperator(
+    #     task_id="dbt_test",
+    #     bash_command=f"cd {DBT_DIR} && dbt test --profiles-dir .",
+    # )
 
     # ========== 6) Indexing Elasticsearch ==========
     t_index_elastic = BashOperator(
         task_id="index_to_elasticsearch",
         bash_command=(
             f"cd {PROJECT_ROOT} && "
-            f"{PYTHON} -m src.indexing.index_usage_to_elastic --execution_date '{{{{ ds }}}}'"
+            f"{PYTHON} -m src.indexing.elk_indexing"
         ),
     )
 
@@ -153,4 +153,5 @@ with DAG(
     [t_format_binance, t_format_yahoo] >> t_combine
     
     # Suite séquentielle
-    t_combine >> t_export_pg >> t_dbt_run >> t_dbt_test >> t_index_elastic >> end
+    # t_combine >> t_export_pg >> t_dbt_run >> t_dbt_test >> t_index_elastic >> end
+    t_combine >> t_export_pg >> t_index_elastic >> end

@@ -1,0 +1,1913 @@
+[0m22:14:08.100434 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6cf32b020>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6d19089e0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6d1ac9c70>]}
+
+
+============================== 22:14:08.102942 | a76ae918-d13a-4ffa-842b-c27d91d7dcef ==============================
+[0m22:14:08.102942 [info ] [MainThread]: Running with dbt=1.11.6
+[0m22:14:08.103401 [debug] [MainThread]: running dbt with arguments {'use_colors': 'True', 'empty': 'False', 'write_json': 'True', 'debug': 'False', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'target_path': 'None', 'profiles_dir': '/home/djnaguro/.dbt', 'version_check': 'True', 'invocation_command': 'dbt run', 'quiet': 'False', 'indirect_selection': 'eager', 'printer_width': '80', 'cache_selected_only': 'False', 'static_parser': 'True', 'fail_fast': 'False', 'partial_parse': 'True', 'no_print': 'None', 'log_cache_events': 'False', 'warn_error': 'None', 'log_format': 'default', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'send_anonymous_usage_stats': 'True', 'introspect': 'True', 'use_experimental_parser': 'False'}
+[0m22:14:08.217843 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'a76ae918-d13a-4ffa-842b-c27d91d7dcef', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6ce2c8d70>]}
+[0m22:14:08.266753 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'a76ae918-d13a-4ffa-842b-c27d91d7dcef', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6cf7230b0>]}
+[0m22:14:08.267445 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m22:14:08.323102 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m22:14:08.323955 [info ] [MainThread]: Unable to do partial parsing because saved manifest not found. Starting full parse.
+[0m22:14:08.324250 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'partial_parser', 'label': 'a76ae918-d13a-4ffa-842b-c27d91d7dcef', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6cefbbaa0>]}
+[0m22:14:09.104226 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': 'a76ae918-d13a-4ffa-842b-c27d91d7dcef', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6cdf48f80>]}
+[0m22:14:09.152437 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m22:14:09.153748 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m22:14:09.162934 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': 'a76ae918-d13a-4ffa-842b-c27d91d7dcef', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6ccbda630>]}
+[0m22:14:09.163345 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m22:14:09.163627 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'a76ae918-d13a-4ffa-842b-c27d91d7dcef', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6ccbfeea0>]}
+[0m22:14:09.165017 [info ] [MainThread]: 
+[0m22:14:09.165341 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m22:14:09.165565 [info ] [MainThread]: 
+[0m22:14:09.165918 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m22:14:09.168868 [debug] [ThreadPool]: Acquiring new postgres connection 'list_finance'
+[0m22:14:09.192515 [debug] [ThreadPool]: Using postgres connection "list_finance"
+[0m22:14:09.192993 [debug] [ThreadPool]: On list_finance: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_finance"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m22:14:09.193354 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m22:14:09.209712 [debug] [ThreadPool]: Postgres adapter: Got a retryable error when attempting to open a postgres connection.
+1 attempts remaining. Retrying in 0 seconds.
+Error:
+could not translate host name "finance" to address: Name or service not known
+
+[0m22:14:09.221374 [debug] [ThreadPool]: Postgres adapter: Error running SQL: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_finance"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m22:14:09.222551 [debug] [ThreadPool]: Postgres adapter: Rolling back transaction.
+[0m22:14:09.223688 [debug] [ThreadPool]: Postgres adapter: Error running SQL: macro list_schemas
+[0m22:14:09.224635 [debug] [ThreadPool]: Postgres adapter: Rolling back transaction.
+[0m22:14:09.225551 [debug] [ThreadPool]: On list_finance: No close available on handle
+[0m22:14:09.227395 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m22:14:09.228459 [debug] [MainThread]: Connection 'list_finance' was properly closed.
+[0m22:14:09.229413 [info ] [MainThread]: 
+[0m22:14:09.230148 [info ] [MainThread]: Finished running  in 0 hours 0 minutes and 0.06 seconds (0.06s).
+[0m22:14:09.231086 [error] [MainThread]: Encountered an error:
+Database Error
+  could not translate host name "finance" to address: Name or service not known
+  
+[0m22:14:09.232808 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 1.1759366, "process_in_blocks": "64", "process_kernel_time": 0.093841, "process_mem_max_rss": "123144", "process_out_blocks": "1880", "process_user_time": 2.062515}
+[0m22:14:09.233861 [debug] [MainThread]: Command `dbt run` failed at 22:14:09.233651 after 1.18 seconds
+[0m22:14:09.234727 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6ceb6c6b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6cdf4b110>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x79f6ccb4f8f0>]}
+[0m22:14:09.235620 [debug] [MainThread]: Flushing usage events
+[0m22:14:09.693143 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m23:10:08.099848 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766304789eb0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766304cd9ee0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766304cda930>]}
+
+
+============================== 23:10:08.102510 | 92522c0f-1d01-4806-ad7f-d70417dcb98d ==============================
+[0m23:10:08.102510 [info ] [MainThread]: Running with dbt=1.11.6
+[0m23:10:08.102995 [debug] [MainThread]: running dbt with arguments {'write_json': 'True', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'fail_fast': 'False', 'log_cache_events': 'False', 'empty': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'introspect': 'True', 'printer_width': '80', 'warn_error': 'None', 'use_experimental_parser': 'False', 'static_parser': 'True', 'indirect_selection': 'eager', 'cache_selected_only': 'False', 'debug': 'False', 'quiet': 'False', 'invocation_command': 'dbt run', 'no_print': 'None', 'target_path': 'None', 'profiles_dir': '/home/djnaguro/.dbt', 'log_format': 'default', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'version_check': 'True', 'use_colors': 'True'}
+[0m23:10:08.245279 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '92522c0f-1d01-4806-ad7f-d70417dcb98d', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766306a53e60>]}
+[0m23:10:08.310193 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '92522c0f-1d01-4806-ad7f-d70417dcb98d', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766303c58d40>]}
+[0m23:10:08.310913 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m23:10:08.378805 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m23:10:08.464512 [info ] [MainThread]: Unable to do partial parsing because profile has changed
+[0m23:10:08.465060 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'partial_parser', 'label': '92522c0f-1d01-4806-ad7f-d70417dcb98d', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7663047f8fe0>]}
+[0m23:10:09.402323 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '92522c0f-1d01-4806-ad7f-d70417dcb98d', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766304f09010>]}
+[0m23:10:09.465660 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m23:10:09.467312 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m23:10:09.478487 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '92522c0f-1d01-4806-ad7f-d70417dcb98d', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766301d06ae0>]}
+[0m23:10:09.478963 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m23:10:09.479277 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '92522c0f-1d01-4806-ad7f-d70417dcb98d', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766302184770>]}
+[0m23:10:09.480925 [info ] [MainThread]: 
+[0m23:10:09.481453 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m23:10:09.481709 [info ] [MainThread]: 
+[0m23:10:09.482102 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m23:10:09.485694 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m23:10:09.533476 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m23:10:09.534145 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m23:10:09.534702 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m23:10:09.547212 [debug] [ThreadPool]: Postgres adapter: Got a retryable error when attempting to open a postgres connection.
+1 attempts remaining. Retrying in 0 seconds.
+Error:
+could not translate host name "datalake-warehouse" to address: Name or service not known
+
+[0m23:10:09.560139 [debug] [ThreadPool]: Postgres adapter: Error running SQL: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m23:10:09.560944 [debug] [ThreadPool]: Postgres adapter: Rolling back transaction.
+[0m23:10:09.561618 [debug] [ThreadPool]: Postgres adapter: Error running SQL: macro list_schemas
+[0m23:10:09.562154 [debug] [ThreadPool]: Postgres adapter: Rolling back transaction.
+[0m23:10:09.562742 [debug] [ThreadPool]: On list_datalake: No close available on handle
+[0m23:10:09.563704 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m23:10:09.564015 [debug] [MainThread]: Connection 'list_datalake' was properly closed.
+[0m23:10:09.564349 [info ] [MainThread]: 
+[0m23:10:09.564668 [info ] [MainThread]: Finished running  in 0 hours 0 minutes and 0.08 seconds (0.08s).
+[0m23:10:09.565093 [error] [MainThread]: Encountered an error:
+Database Error
+  could not translate host name "datalake-warehouse" to address: Name or service not known
+  
+[0m23:10:09.566013 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 1.5087407, "process_in_blocks": "0", "process_kernel_time": 0.115978, "process_mem_max_rss": "123996", "process_out_blocks": "1888", "process_user_time": 2.62652}
+[0m23:10:09.566644 [debug] [MainThread]: Command `dbt run` failed at 23:10:09.566522 after 1.51 seconds
+[0m23:10:09.567005 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766304f0a1b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7663025cc740>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x766303d12780>]}
+[0m23:10:09.567357 [debug] [MainThread]: Flushing usage events
+[0m23:10:09.987090 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m00:02:11.334582 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc637b37200>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc636298ad0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc6363987a0>]}
+
+
+============================== 00:02:11.337507 | 774165db-2dae-4c44-97b8-c473e4e28d8c ==============================
+[0m00:02:11.337507 [info ] [MainThread]: Running with dbt=1.11.6
+[0m00:02:11.337984 [debug] [MainThread]: running dbt with arguments {'indirect_selection': 'eager', 'write_json': 'True', 'debug': 'False', 'target_path': 'None', 'log_format': 'default', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'empty': 'False', 'fail_fast': 'False', 'partial_parse': 'True', 'quiet': 'False', 'no_print': 'None', 'use_colors': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'profiles_dir': '/home/djnaguro/.dbt', 'use_experimental_parser': 'False', 'static_parser': 'True', 'log_cache_events': 'False', 'send_anonymous_usage_stats': 'True', 'invocation_command': 'dbt run', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'version_check': 'True', 'introspect': 'True', 'printer_width': '80'}
+[0m00:02:11.457442 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '774165db-2dae-4c44-97b8-c473e4e28d8c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc63586f080>]}
+[0m00:02:11.507273 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '774165db-2dae-4c44-97b8-c473e4e28d8c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc635b04f20>]}
+[0m00:02:11.507998 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m00:02:11.564938 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m00:02:11.626060 [info ] [MainThread]: Unable to do partial parsing because profile has changed
+[0m00:02:11.626454 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'partial_parser', 'label': '774165db-2dae-4c44-97b8-c473e4e28d8c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc633b3f110>]}
+[0m00:02:12.397845 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '774165db-2dae-4c44-97b8-c473e4e28d8c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc6347e18b0>]}
+[0m00:02:12.443495 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m00:02:12.444818 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m00:02:12.454560 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '774165db-2dae-4c44-97b8-c473e4e28d8c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc6337dba40>]}
+[0m00:02:12.454922 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m00:02:12.455195 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '774165db-2dae-4c44-97b8-c473e4e28d8c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc633b5c050>]}
+[0m00:02:12.456538 [info ] [MainThread]: 
+[0m00:02:12.456838 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m00:02:12.457067 [info ] [MainThread]: 
+[0m00:02:12.457419 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m00:02:12.460646 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m00:02:12.485428 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m00:02:12.485815 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m00:02:12.486063 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m00:02:12.502182 [debug] [ThreadPool]: Postgres adapter: Got a retryable error when attempting to open a postgres connection.
+1 attempts remaining. Retrying in 0 seconds.
+Error:
+connection to server at "localhost" (127.0.0.1), port 5432 failed: FATAL:  password authentication failed for user "datalake_user"
+connection to server at "localhost" (127.0.0.1), port 5432 failed: FATAL:  password authentication failed for user "datalake_user"
+
+[0m00:02:12.522317 [debug] [ThreadPool]: Postgres adapter: Error running SQL: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m00:02:12.523104 [debug] [ThreadPool]: Postgres adapter: Rolling back transaction.
+[0m00:02:12.523800 [debug] [ThreadPool]: Postgres adapter: Error running SQL: macro list_schemas
+[0m00:02:12.524344 [debug] [ThreadPool]: Postgres adapter: Rolling back transaction.
+[0m00:02:12.524870 [debug] [ThreadPool]: On list_datalake: No close available on handle
+[0m00:02:12.525984 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m00:02:12.526632 [debug] [MainThread]: Connection 'list_datalake' was properly closed.
+[0m00:02:12.527118 [info ] [MainThread]: 
+[0m00:02:12.527673 [info ] [MainThread]: Finished running  in 0 hours 0 minutes and 0.07 seconds (0.07s).
+[0m00:02:12.528413 [error] [MainThread]: Encountered an error:
+Database Error
+  connection to server at "localhost" (127.0.0.1), port 5432 failed: FATAL:  password authentication failed for user "datalake_user"
+  connection to server at "localhost" (127.0.0.1), port 5432 failed: FATAL:  password authentication failed for user "datalake_user"
+  
+[0m00:02:12.529768 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 1.2383878, "process_in_blocks": "0", "process_kernel_time": 0.106877, "process_mem_max_rss": "128804", "process_out_blocks": "1880", "process_user_time": 2.135557}
+[0m00:02:12.530590 [debug] [MainThread]: Command `dbt run` failed at 00:02:12.530431 after 1.24 seconds
+[0m00:02:12.531261 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc6359a08f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc6333a9dc0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fc6333b70e0>]}
+[0m00:02:12.531886 [debug] [MainThread]: Flushing usage events
+[0m00:02:12.983081 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m00:07:52.547336 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb8210bc80>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb81e03b00>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb81e01460>]}
+
+
+============================== 00:07:52.551310 | f6121148-1023-4589-95dd-3ce7fed72b7c ==============================
+[0m00:07:52.551310 [info ] [MainThread]: Running with dbt=1.11.6
+[0m00:07:52.552034 [debug] [MainThread]: running dbt with arguments {'version_check': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'log_format': 'default', 'log_cache_events': 'False', 'profiles_dir': '/home/djnaguro/.dbt', 'write_json': 'True', 'send_anonymous_usage_stats': 'True', 'indirect_selection': 'eager', 'printer_width': '80', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'debug': 'False', 'warn_error': 'None', 'cache_selected_only': 'False', 'invocation_command': 'dbt run', 'empty': 'False', 'quiet': 'False', 'static_parser': 'True', 'fail_fast': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'introspect': 'True', 'no_print': 'None', 'partial_parse': 'True', 'target_path': 'None'}
+[0m00:07:52.678105 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb82390fe0>]}
+[0m00:07:52.727579 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb824e0590>]}
+[0m00:07:52.728260 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m00:07:52.784056 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m00:07:52.845092 [info ] [MainThread]: Unable to do partial parsing because profile has changed
+[0m00:07:52.845481 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'partial_parser', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb81e00e90>]}
+[0m00:07:53.612005 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb803a2840>]}
+[0m00:07:53.656740 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m00:07:53.658018 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m00:07:53.666657 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb80be6ab0>]}
+[0m00:07:53.667055 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m00:07:53.667342 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb814f04d0>]}
+[0m00:07:53.668714 [info ] [MainThread]: 
+[0m00:07:53.669024 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m00:07:53.669272 [info ] [MainThread]: 
+[0m00:07:53.669615 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m00:07:53.672466 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m00:07:53.693314 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m00:07:53.693701 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m00:07:53.693945 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m00:07:53.707150 [debug] [ThreadPool]: SQL status: SELECT 4 in 0.013 seconds
+[0m00:07:53.708256 [debug] [ThreadPool]: On list_datalake: Close
+[0m00:07:53.708865 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_datalake, now create_datalake_lead_lag_analysis)
+[0m00:07:53.709243 [debug] [ThreadPool]: Creating schema "database: "datalake"
+schema: "lead_lag_analysis"
+"
+[0m00:07:53.713024 [debug] [ThreadPool]: Using postgres connection "create_datalake_lead_lag_analysis"
+[0m00:07:53.713316 [debug] [ThreadPool]: On create_datalake_lead_lag_analysis: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "create_datalake_lead_lag_analysis"} */
+create schema if not exists "lead_lag_analysis"
+[0m00:07:53.713540 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m00:07:53.719360 [debug] [ThreadPool]: SQL status: CREATE SCHEMA in 0.006 seconds
+[0m00:07:53.720145 [debug] [ThreadPool]: On create_datalake_lead_lag_analysis: COMMIT
+[0m00:07:53.720454 [debug] [ThreadPool]: Using postgres connection "create_datalake_lead_lag_analysis"
+[0m00:07:53.720686 [debug] [ThreadPool]: On create_datalake_lead_lag_analysis: COMMIT
+[0m00:07:53.722326 [debug] [ThreadPool]: SQL status: COMMIT in 0.001 seconds
+[0m00:07:53.722622 [debug] [ThreadPool]: On create_datalake_lead_lag_analysis: Close
+[0m00:07:53.723852 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly create_datalake_lead_lag_analysis, now list_datalake_lead_lag_analysis)
+[0m00:07:53.731778 [debug] [ThreadPool]: Using postgres connection "list_datalake_lead_lag_analysis"
+[0m00:07:53.732265 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake_lead_lag_analysis"} */
+select
+      'datalake' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'lead_lag_analysis'
+  
+[0m00:07:53.732633 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m00:07:53.745445 [debug] [ThreadPool]: SQL status: SELECT 0 in 0.013 seconds
+[0m00:07:53.747645 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: ROLLBACK
+[0m00:07:53.748701 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: Close
+[0m00:07:53.756347 [debug] [MainThread]: Using postgres connection "master"
+[0m00:07:53.757179 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "master"} */
+select distinct
+        dependent_namespace.nspname as dependent_schema,
+        dependent_class.relname as dependent_name,
+        referenced_namespace.nspname as referenced_schema,
+        referenced_class.relname as referenced_name
+
+    -- Query for views: views are entries in pg_class with an entry in pg_rewrite, but we avoid
+    -- a seq scan on pg_rewrite by leveraging the fact there is an "internal" row in pg_depend for
+    -- the view...
+    from pg_class as dependent_class
+    join pg_namespace as dependent_namespace on dependent_namespace.oid = dependent_class.relnamespace
+    join pg_depend as dependent_depend on dependent_depend.refobjid = dependent_class.oid
+        and dependent_depend.classid = 'pg_rewrite'::regclass
+        and dependent_depend.refclassid = 'pg_class'::regclass
+        and dependent_depend.deptype = 'i'
+
+    -- ... and via pg_depend (that has a row per column, hence the need for "distinct" above, and
+    -- making sure to exclude the internal row to avoid a view appearing to depend on itself)...
+    join pg_depend as joining_depend on joining_depend.objid = dependent_depend.objid
+        and joining_depend.classid = 'pg_rewrite'::regclass
+        and joining_depend.refclassid = 'pg_class'::regclass
+        and joining_depend.refobjid != dependent_depend.refobjid
+
+    -- ... we can find the tables they query from in pg_class, but excluding system tables. Note we
+    -- don't need need to exclude _dependent_ system tables, because they only query from other
+    -- system tables, and so are automatically excluded by excluding _referenced_ system tables
+    join pg_class as referenced_class on referenced_class.oid = joining_depend.refobjid
+    join pg_namespace as referenced_namespace on referenced_namespace.oid = referenced_class.relnamespace
+        and referenced_namespace.nspname != 'information_schema'
+        and referenced_namespace.nspname not like 'pg\_%'
+
+    order by
+        dependent_schema, dependent_name, referenced_schema, referenced_name;
+[0m00:07:53.757825 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m00:07:53.776846 [debug] [MainThread]: SQL status: SELECT 1 in 0.019 seconds
+[0m00:07:53.779444 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb7ef0e7e0>]}
+[0m00:07:53.780414 [debug] [MainThread]: On master: ROLLBACK
+[0m00:07:53.781416 [debug] [MainThread]: On master: COMMIT
+[0m00:07:53.782060 [debug] [MainThread]: Using postgres connection "master"
+[0m00:07:53.782604 [debug] [MainThread]: On master: COMMIT
+[0m00:07:53.783378 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m00:07:53.783970 [debug] [MainThread]: On master: Close
+[0m00:07:53.789487 [debug] [Thread-1 (]: Began running node model.finance.lead_lag
+[0m00:07:53.790526 [info ] [Thread-1 (]: 1 of 3 START sql view model lead_lag_analysis.lead_lag ......................... [RUN]
+[0m00:07:53.791364 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_datalake_lead_lag_analysis, now model.finance.lead_lag)
+[0m00:07:53.791934 [debug] [Thread-1 (]: Began compiling node model.finance.lead_lag
+[0m00:07:53.800776 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.lead_lag"
+[0m00:07:53.802151 [debug] [Thread-1 (]: Began executing node model.finance.lead_lag
+[0m00:07:53.832187 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.lead_lag"
+[0m00:07:53.832837 [debug] [Thread-1 (]: Using postgres connection "model.finance.lead_lag"
+[0m00:07:53.833146 [debug] [Thread-1 (]: On model.finance.lead_lag: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.lead_lag"} */
+
+  create view "datalake"."lead_lag_analysis"."lead_lag__dbt_tmp"
+    
+    
+  as (
+    with lead_lag as (
+  SELECT *
+  FROM '../../..//home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/data/usage/finance/lead_lag_analysis/**/*.parquet'
+)
+
+SELECT * 
+FROM lead_lag
+  );
+[0m00:07:53.833431 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:07:53.836657 [debug] [Thread-1 (]: Postgres adapter: Postgres error: syntax error at or near "'../../..//home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/data/usage/finance/lead_lag_analysis/**/*.parquet'"
+LINE 9:   FROM '../../..//home/djnaguro/Documents/Master Spécialisé ...
+               ^
+
+[0m00:07:53.837390 [debug] [Thread-1 (]: On model.finance.lead_lag: ROLLBACK
+[0m00:07:53.838334 [debug] [Thread-1 (]: On model.finance.lead_lag: Close
+[0m00:07:53.841724 [debug] [Thread-1 (]: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../..//home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../..//home/djnaguro/Documents/Master Spécialisé ...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m00:07:53.843133 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb824e1e20>]}
+[0m00:07:53.843762 [error] [Thread-1 (]: 1 of 3 ERROR creating sql view model lead_lag_analysis.lead_lag ................ [[31mERROR[0m in 0.05s]
+[0m00:07:53.844348 [debug] [Thread-1 (]: Finished running node model.finance.lead_lag
+[0m00:07:53.844734 [debug] [Thread-1 (]: Began running node model.finance.my_first_dbt_model
+[0m00:07:53.845492 [debug] [Thread-4 (]: Marking all children of 'model.finance.lead_lag' to be skipped because of status 'error'.  Reason: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../..//home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../..//home/djnaguro/Documents/Master Spécialisé ...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql.
+[0m00:07:53.846339 [info ] [Thread-1 (]: 2 of 3 START sql table model lead_lag_analysis.my_first_dbt_model .............. [RUN]
+[0m00:07:53.848277 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.lead_lag, now model.finance.my_first_dbt_model)
+[0m00:07:53.848807 [debug] [Thread-1 (]: Began compiling node model.finance.my_first_dbt_model
+[0m00:07:53.852390 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_first_dbt_model"
+[0m00:07:53.853315 [debug] [Thread-1 (]: Began executing node model.finance.my_first_dbt_model
+[0m00:07:53.871433 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_first_dbt_model"
+[0m00:07:53.872086 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:07:53.872423 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+
+  
+    
+
+  create  table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp"
+  
+  
+    as
+  
+  (
+    /*
+    Welcome to your first dbt model!
+    Did you know that you can also configure models directly within SQL files?
+    This will override configurations stated in dbt_project.yml
+
+    Try changing "table" to "view" below
+*/
+
+
+
+with source_data as (
+
+    select 1 as id
+    union all
+    select null as id
+
+)
+
+select *
+from source_data
+
+/*
+    Uncomment the line below to remove records with null `id` values
+*/
+
+-- where id is not null
+  );
+  
+[0m00:07:53.872686 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:07:53.882057 [debug] [Thread-1 (]: SQL status: SELECT 2 in 0.009 seconds
+[0m00:07:53.889659 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:07:53.890039 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp" rename to "my_first_dbt_model"
+[0m00:07:53.890815 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m00:07:53.900648 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m00:07:53.900960 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:07:53.901221 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m00:07:53.902864 [debug] [Thread-1 (]: SQL status: COMMIT in 0.001 seconds
+[0m00:07:53.907178 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup"
+[0m00:07:53.910802 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:07:53.911186 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+drop table if exists "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup" cascade
+[0m00:07:53.911867 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.000 seconds
+[0m00:07:53.913668 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: Close
+[0m00:07:53.914247 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb8404b200>]}
+[0m00:07:53.914935 [info ] [Thread-1 (]: 2 of 3 OK created sql table model lead_lag_analysis.my_first_dbt_model ......... [[32mSELECT 2[0m in 0.07s]
+[0m00:07:53.915519 [debug] [Thread-1 (]: Finished running node model.finance.my_first_dbt_model
+[0m00:07:53.916500 [debug] [Thread-1 (]: Began running node model.finance.my_second_dbt_model
+[0m00:07:53.916898 [info ] [Thread-1 (]: 3 of 3 START sql view model lead_lag_analysis.my_second_dbt_model .............. [RUN]
+[0m00:07:53.917238 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.my_first_dbt_model, now model.finance.my_second_dbt_model)
+[0m00:07:53.917493 [debug] [Thread-1 (]: Began compiling node model.finance.my_second_dbt_model
+[0m00:07:53.919240 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_second_dbt_model"
+[0m00:07:53.919631 [debug] [Thread-1 (]: Began executing node model.finance.my_second_dbt_model
+[0m00:07:53.921850 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_second_dbt_model"
+[0m00:07:53.922243 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:07:53.922510 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+
+  create view "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp"
+    
+    
+  as (
+    -- Use the `ref` function to select from other models
+
+select *
+from "datalake"."lead_lag_analysis"."my_first_dbt_model"
+where id = 1
+  );
+[0m00:07:53.922746 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:07:53.927853 [debug] [Thread-1 (]: SQL status: CREATE VIEW in 0.005 seconds
+[0m00:07:53.929863 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:07:53.930179 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp" rename to "my_second_dbt_model"
+[0m00:07:53.930746 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m00:07:53.931918 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m00:07:53.932229 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:07:53.932498 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m00:07:53.934295 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m00:07:53.935829 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup"
+[0m00:07:53.938594 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:07:53.939011 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+drop view if exists "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup" cascade
+[0m00:07:53.939847 [debug] [Thread-1 (]: SQL status: DROP VIEW in 0.000 seconds
+[0m00:07:53.941082 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: Close
+[0m00:07:53.941636 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'f6121148-1023-4589-95dd-3ce7fed72b7c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb7c26b620>]}
+[0m00:07:53.942193 [info ] [Thread-1 (]: 3 of 3 OK created sql view model lead_lag_analysis.my_second_dbt_model ......... [[32mCREATE VIEW[0m in 0.02s]
+[0m00:07:53.942650 [debug] [Thread-1 (]: Finished running node model.finance.my_second_dbt_model
+[0m00:07:53.943924 [debug] [MainThread]: On master: COMMIT
+[0m00:07:53.944464 [debug] [MainThread]: Using postgres connection "master"
+[0m00:07:53.944929 [debug] [MainThread]: On master: COMMIT
+[0m00:07:53.945461 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m00:07:53.949567 [debug] [MainThread]: SQL status: COMMIT in 0.004 seconds
+[0m00:07:53.950260 [debug] [MainThread]: On master: Close
+[0m00:07:53.950935 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m00:07:53.951451 [debug] [MainThread]: Connection 'model.finance.my_second_dbt_model' was properly closed.
+[0m00:07:53.952070 [info ] [MainThread]: 
+[0m00:07:53.952661 [info ] [MainThread]: Finished running 1 table model, 2 view models in 0 hours 0 minutes and 0.28 seconds (0.28s).
+[0m00:07:53.954347 [debug] [MainThread]: Command end result
+[0m00:07:53.975843 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m00:07:53.977789 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m00:07:53.982784 [debug] [MainThread]: Wrote artifact RunExecutionResult to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/run_results.json
+[0m00:07:53.983132 [info ] [MainThread]: 
+[0m00:07:53.983463 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m00:07:53.983788 [info ] [MainThread]: 
+[0m00:07:53.984118 [error] [MainThread]: [31mFailure in model lead_lag (models/finance/lead_lag.sql)[0m
+[0m00:07:53.984476 [error] [MainThread]:   Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../..//home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../..//home/djnaguro/Documents/Master Spécialisé ...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m00:07:53.984759 [info ] [MainThread]: 
+[0m00:07:53.985057 [info ] [MainThread]:   compiled code at target/compiled/finance/models/finance/lead_lag.sql
+[0m00:07:53.985320 [info ] [MainThread]: 
+[0m00:07:53.985608 [info ] [MainThread]: Done. PASS=2 WARN=0 ERROR=1 SKIP=0 NO-OP=0 TOTAL=3
+[0m00:07:53.986348 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 1.4820178, "process_in_blocks": "80", "process_kernel_time": 0.115333, "process_mem_max_rss": "129572", "process_out_blocks": "2888", "process_user_time": 2.345789}
+[0m00:07:53.986802 [debug] [MainThread]: Command `dbt run` failed at 00:07:53.986716 after 1.48 seconds
+[0m00:07:53.987193 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb84253200>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb82512540>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7afb7c2ad3d0>]}
+[0m00:07:53.987508 [debug] [MainThread]: Flushing usage events
+[0m00:07:54.401664 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m00:29:12.552135 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c355b3110>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c34b23260>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c355b2000>]}
+
+
+============================== 00:29:12.555536 | 17865927-8cdc-45f0-8d32-0bc6f4f1222c ==============================
+[0m00:29:12.555536 [info ] [MainThread]: Running with dbt=1.11.6
+[0m00:29:12.556014 [debug] [MainThread]: running dbt with arguments {'indirect_selection': 'eager', 'partial_parse': 'True', 'quiet': 'False', 'cache_selected_only': 'False', 'target_path': 'None', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'write_json': 'True', 'warn_error': 'None', 'log_format': 'default', 'invocation_command': 'dbt run', 'use_experimental_parser': 'False', 'introspect': 'True', 'send_anonymous_usage_stats': 'True', 'empty': 'False', 'version_check': 'True', 'use_colors': 'True', 'static_parser': 'True', 'profiles_dir': '/home/djnaguro/.dbt', 'printer_width': '80', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'log_cache_events': 'False', 'fail_fast': 'False', 'debug': 'False', 'no_print': 'None'}
+[0m00:29:12.675832 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c33d3df70>]}
+[0m00:29:12.726016 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c3720f620>]}
+[0m00:29:12.726679 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m00:29:12.779170 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m00:29:12.845953 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 1 files changed.
+[0m00:29:12.846530 [debug] [MainThread]: Partial parsing: updated file: finance://models/finance/lead_lag.sql
+[0m00:29:13.032923 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c325b08c0>]}
+[0m00:29:13.077027 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m00:29:13.078348 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m00:29:13.087214 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c325617c0>]}
+[0m00:29:13.087563 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m00:29:13.087831 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c325b3560>]}
+[0m00:29:13.089101 [info ] [MainThread]: 
+[0m00:29:13.089399 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m00:29:13.089624 [info ] [MainThread]: 
+[0m00:29:13.089972 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m00:29:13.093233 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m00:29:13.118688 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m00:29:13.119109 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m00:29:13.119400 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m00:29:13.126146 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.007 seconds
+[0m00:29:13.128453 [debug] [ThreadPool]: On list_datalake: Close
+[0m00:29:13.130659 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_datalake, now list_datalake_lead_lag_analysis)
+[0m00:29:13.140455 [debug] [ThreadPool]: Using postgres connection "list_datalake_lead_lag_analysis"
+[0m00:29:13.140833 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake_lead_lag_analysis"} */
+select
+      'datalake' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'lead_lag_analysis'
+  
+[0m00:29:13.141124 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m00:29:13.146820 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.006 seconds
+[0m00:29:13.148774 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: ROLLBACK
+[0m00:29:13.149656 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: Close
+[0m00:29:13.156324 [debug] [MainThread]: Using postgres connection "master"
+[0m00:29:13.157082 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "master"} */
+select distinct
+        dependent_namespace.nspname as dependent_schema,
+        dependent_class.relname as dependent_name,
+        referenced_namespace.nspname as referenced_schema,
+        referenced_class.relname as referenced_name
+
+    -- Query for views: views are entries in pg_class with an entry in pg_rewrite, but we avoid
+    -- a seq scan on pg_rewrite by leveraging the fact there is an "internal" row in pg_depend for
+    -- the view...
+    from pg_class as dependent_class
+    join pg_namespace as dependent_namespace on dependent_namespace.oid = dependent_class.relnamespace
+    join pg_depend as dependent_depend on dependent_depend.refobjid = dependent_class.oid
+        and dependent_depend.classid = 'pg_rewrite'::regclass
+        and dependent_depend.refclassid = 'pg_class'::regclass
+        and dependent_depend.deptype = 'i'
+
+    -- ... and via pg_depend (that has a row per column, hence the need for "distinct" above, and
+    -- making sure to exclude the internal row to avoid a view appearing to depend on itself)...
+    join pg_depend as joining_depend on joining_depend.objid = dependent_depend.objid
+        and joining_depend.classid = 'pg_rewrite'::regclass
+        and joining_depend.refclassid = 'pg_class'::regclass
+        and joining_depend.refobjid != dependent_depend.refobjid
+
+    -- ... we can find the tables they query from in pg_class, but excluding system tables. Note we
+    -- don't need need to exclude _dependent_ system tables, because they only query from other
+    -- system tables, and so are automatically excluded by excluding _referenced_ system tables
+    join pg_class as referenced_class on referenced_class.oid = joining_depend.refobjid
+    join pg_namespace as referenced_namespace on referenced_namespace.oid = referenced_class.relnamespace
+        and referenced_namespace.nspname != 'information_schema'
+        and referenced_namespace.nspname not like 'pg\_%'
+
+    order by
+        dependent_schema, dependent_name, referenced_schema, referenced_name;
+[0m00:29:13.157765 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m00:29:13.169387 [debug] [MainThread]: SQL status: SELECT 2 in 0.011 seconds
+[0m00:29:13.172877 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c33df3380>]}
+[0m00:29:13.173679 [debug] [MainThread]: On master: ROLLBACK
+[0m00:29:13.174370 [debug] [MainThread]: On master: COMMIT
+[0m00:29:13.174820 [debug] [MainThread]: Using postgres connection "master"
+[0m00:29:13.175198 [debug] [MainThread]: On master: COMMIT
+[0m00:29:13.175761 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m00:29:13.176165 [debug] [MainThread]: On master: Close
+[0m00:29:13.178964 [debug] [Thread-1 (]: Began running node model.finance.lead_lag
+[0m00:29:13.180048 [info ] [Thread-1 (]: 1 of 3 START sql view model lead_lag_analysis.lead_lag ......................... [RUN]
+[0m00:29:13.180794 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_datalake_lead_lag_analysis, now model.finance.lead_lag)
+[0m00:29:13.181273 [debug] [Thread-1 (]: Began compiling node model.finance.lead_lag
+[0m00:29:13.186750 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.lead_lag"
+[0m00:29:13.187279 [debug] [Thread-1 (]: Began executing node model.finance.lead_lag
+[0m00:29:13.212261 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.lead_lag"
+[0m00:29:13.212964 [debug] [Thread-1 (]: Using postgres connection "model.finance.lead_lag"
+[0m00:29:13.213323 [debug] [Thread-1 (]: On model.finance.lead_lag: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.lead_lag"} */
+
+  create view "datalake"."lead_lag_analysis"."lead_lag__dbt_tmp"
+    
+    
+  as (
+    with lead_lag as (
+  SELECT *
+  FROM '../../../data/usage/finance/lead_lag_analysis/**/*.parquet'
+)
+
+SELECT * 
+FROM lead_lag
+  );
+[0m00:29:13.213599 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:29:13.218034 [debug] [Thread-1 (]: Postgres adapter: Postgres error: syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+               ^
+
+[0m00:29:13.218809 [debug] [Thread-1 (]: On model.finance.lead_lag: ROLLBACK
+[0m00:29:13.219666 [debug] [Thread-1 (]: On model.finance.lead_lag: Close
+[0m00:29:13.222565 [debug] [Thread-1 (]: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m00:29:13.223874 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c33114b00>]}
+[0m00:29:13.224423 [error] [Thread-1 (]: 1 of 3 ERROR creating sql view model lead_lag_analysis.lead_lag ................ [[31mERROR[0m in 0.04s]
+[0m00:29:13.224870 [debug] [Thread-1 (]: Finished running node model.finance.lead_lag
+[0m00:29:13.225198 [debug] [Thread-1 (]: Began running node model.finance.my_first_dbt_model
+[0m00:29:13.225766 [debug] [Thread-4 (]: Marking all children of 'model.finance.lead_lag' to be skipped because of status 'error'.  Reason: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql.
+[0m00:29:13.226398 [info ] [Thread-1 (]: 2 of 3 START sql table model lead_lag_analysis.my_first_dbt_model .............. [RUN]
+[0m00:29:13.227667 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.lead_lag, now model.finance.my_first_dbt_model)
+[0m00:29:13.228049 [debug] [Thread-1 (]: Began compiling node model.finance.my_first_dbt_model
+[0m00:29:13.231390 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_first_dbt_model"
+[0m00:29:13.231925 [debug] [Thread-1 (]: Began executing node model.finance.my_first_dbt_model
+[0m00:29:13.252483 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_first_dbt_model"
+[0m00:29:13.253106 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:29:13.253448 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+
+  
+    
+
+  create  table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp"
+  
+  
+    as
+  
+  (
+    /*
+    Welcome to your first dbt model!
+    Did you know that you can also configure models directly within SQL files?
+    This will override configurations stated in dbt_project.yml
+
+    Try changing "table" to "view" below
+*/
+
+
+
+with source_data as (
+
+    select 1 as id
+    union all
+    select null as id
+
+)
+
+select *
+from source_data
+
+/*
+    Uncomment the line below to remove records with null `id` values
+*/
+
+-- where id is not null
+  );
+  
+[0m00:29:13.253706 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:29:13.258860 [debug] [Thread-1 (]: SQL status: SELECT 2 in 0.005 seconds
+[0m00:29:13.266350 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:29:13.266723 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model" rename to "my_first_dbt_model__dbt_backup"
+[0m00:29:13.267744 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m00:29:13.270271 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:29:13.270702 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp" rename to "my_first_dbt_model"
+[0m00:29:13.271672 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m00:29:13.284695 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m00:29:13.285025 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:29:13.285302 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m00:29:13.287182 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m00:29:13.291767 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup"
+[0m00:29:13.295389 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:29:13.295850 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+drop table if exists "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup" cascade
+[0m00:29:13.300235 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.004 seconds
+[0m00:29:13.302166 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: Close
+[0m00:29:13.302699 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c3714f170>]}
+[0m00:29:13.303235 [info ] [Thread-1 (]: 2 of 3 OK created sql table model lead_lag_analysis.my_first_dbt_model ......... [[32mSELECT 2[0m in 0.08s]
+[0m00:29:13.303746 [debug] [Thread-1 (]: Finished running node model.finance.my_first_dbt_model
+[0m00:29:13.304334 [debug] [Thread-1 (]: Began running node model.finance.my_second_dbt_model
+[0m00:29:13.304721 [info ] [Thread-1 (]: 3 of 3 START sql view model lead_lag_analysis.my_second_dbt_model .............. [RUN]
+[0m00:29:13.305237 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.my_first_dbt_model, now model.finance.my_second_dbt_model)
+[0m00:29:13.305568 [debug] [Thread-1 (]: Began compiling node model.finance.my_second_dbt_model
+[0m00:29:13.307764 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_second_dbt_model"
+[0m00:29:13.308369 [debug] [Thread-1 (]: Began executing node model.finance.my_second_dbt_model
+[0m00:29:13.312065 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_second_dbt_model"
+[0m00:29:13.312748 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:29:13.313210 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+
+  create view "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp"
+    
+    
+  as (
+    -- Use the `ref` function to select from other models
+
+select *
+from "datalake"."lead_lag_analysis"."my_first_dbt_model"
+where id = 1
+  );
+[0m00:29:13.313637 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:29:13.324520 [debug] [Thread-1 (]: SQL status: CREATE VIEW in 0.010 seconds
+[0m00:29:13.330805 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:29:13.331537 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp" rename to "my_second_dbt_model"
+[0m00:29:13.332913 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m00:29:13.334894 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m00:29:13.335426 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:29:13.335839 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m00:29:13.337690 [debug] [Thread-1 (]: SQL status: COMMIT in 0.001 seconds
+[0m00:29:13.341144 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup"
+[0m00:29:13.343720 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:29:13.344035 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+drop view if exists "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup" cascade
+[0m00:29:13.344507 [debug] [Thread-1 (]: SQL status: DROP VIEW in 0.000 seconds
+[0m00:29:13.345463 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: Close
+[0m00:29:13.345994 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '17865927-8cdc-45f0-8d32-0bc6f4f1222c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c293c40e0>]}
+[0m00:29:13.346539 [info ] [Thread-1 (]: 3 of 3 OK created sql view model lead_lag_analysis.my_second_dbt_model ......... [[32mCREATE VIEW[0m in 0.04s]
+[0m00:29:13.346983 [debug] [Thread-1 (]: Finished running node model.finance.my_second_dbt_model
+[0m00:29:13.347819 [debug] [MainThread]: On master: COMMIT
+[0m00:29:13.348102 [debug] [MainThread]: Using postgres connection "master"
+[0m00:29:13.348344 [debug] [MainThread]: On master: COMMIT
+[0m00:29:13.348559 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m00:29:13.352236 [debug] [MainThread]: SQL status: COMMIT in 0.004 seconds
+[0m00:29:13.352906 [debug] [MainThread]: On master: Close
+[0m00:29:13.353686 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m00:29:13.354289 [debug] [MainThread]: Connection 'model.finance.my_second_dbt_model' was properly closed.
+[0m00:29:13.355010 [info ] [MainThread]: 
+[0m00:29:13.355724 [info ] [MainThread]: Finished running 1 table model, 2 view models in 0 hours 0 minutes and 0.26 seconds (0.26s).
+[0m00:29:13.357917 [debug] [MainThread]: Command end result
+[0m00:29:13.479837 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m00:29:13.481380 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m00:29:13.485882 [debug] [MainThread]: Wrote artifact RunExecutionResult to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/run_results.json
+[0m00:29:13.486187 [info ] [MainThread]: 
+[0m00:29:13.486470 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m00:29:13.486712 [info ] [MainThread]: 
+[0m00:29:13.486989 [error] [MainThread]: [31mFailure in model lead_lag (models/finance/lead_lag.sql)[0m
+[0m00:29:13.487282 [error] [MainThread]:   Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m00:29:13.487493 [info ] [MainThread]: 
+[0m00:29:13.487729 [info ] [MainThread]:   compiled code at target/compiled/finance/models/finance/lead_lag.sql
+[0m00:29:13.487942 [info ] [MainThread]: 
+[0m00:29:13.488171 [info ] [MainThread]: Done. PASS=2 WARN=0 ERROR=1 SKIP=0 NO-OP=0 TOTAL=3
+[0m00:29:13.488829 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.98006475, "process_in_blocks": "0", "process_kernel_time": 0.11285, "process_mem_max_rss": "128208", "process_out_blocks": "2880", "process_user_time": 1.827584}
+[0m00:29:13.489190 [debug] [MainThread]: Command `dbt run` failed at 00:29:13.489110 after 0.98 seconds
+[0m00:29:13.489488 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c354bbef0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c293aca10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f0c293ac9b0>]}
+[0m00:29:13.489769 [debug] [MainThread]: Flushing usage events
+[0m00:29:13.921024 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m00:30:18.654112 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe088ca330>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe08748a40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe0874b560>]}
+
+
+============================== 00:30:18.659076 | 82acdf39-26ab-4c5a-801f-08eca1fafc62 ==============================
+[0m00:30:18.659076 [info ] [MainThread]: Running with dbt=1.11.6
+[0m00:30:18.659999 [debug] [MainThread]: running dbt with arguments {'cache_selected_only': 'False', 'write_json': 'True', 'empty': 'False', 'indirect_selection': 'eager', 'version_check': 'True', 'use_experimental_parser': 'False', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'send_anonymous_usage_stats': 'True', 'log_format': 'default', 'use_colors': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'no_print': 'None', 'partial_parse': 'True', 'target_path': 'None', 'log_cache_events': 'False', 'invocation_command': 'dbt run', 'profiles_dir': '/home/djnaguro/.dbt', 'warn_error': 'None', 'printer_width': '80', 'static_parser': 'True', 'fail_fast': 'False', 'debug': 'False', 'introspect': 'True', 'quiet': 'False'}
+[0m00:30:18.782626 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe0861a9f0>]}
+[0m00:30:18.833426 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe07e52c30>]}
+[0m00:30:18.834054 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m00:30:18.913935 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m00:30:18.980844 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 0 files changed.
+[0m00:30:18.981255 [debug] [MainThread]: Nothing changed, skipping partial parsing.
+[0m00:30:18.981495 [debug] [MainThread]: Partial parsing enabled, no changes found, skipping parsing
+[0m00:30:19.007925 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe067e9d60>]}
+[0m00:30:19.053906 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m00:30:19.055133 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m00:30:19.065530 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe05ff61b0>]}
+[0m00:30:19.065972 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m00:30:19.066276 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe06b17680>]}
+[0m00:30:19.067672 [info ] [MainThread]: 
+[0m00:30:19.067985 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m00:30:19.068221 [info ] [MainThread]: 
+[0m00:30:19.068591 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m00:30:19.071514 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m00:30:19.103829 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m00:30:19.104234 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m00:30:19.104493 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m00:30:19.110493 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.006 seconds
+[0m00:30:19.112077 [debug] [ThreadPool]: On list_datalake: Close
+[0m00:30:19.113458 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_datalake, now list_datalake_lead_lag_analysis)
+[0m00:30:19.123322 [debug] [ThreadPool]: Using postgres connection "list_datalake_lead_lag_analysis"
+[0m00:30:19.124220 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake_lead_lag_analysis"} */
+select
+      'datalake' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'lead_lag_analysis'
+  
+[0m00:30:19.124884 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m00:30:19.133501 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.008 seconds
+[0m00:30:19.135841 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: ROLLBACK
+[0m00:30:19.136713 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: Close
+[0m00:30:19.141834 [debug] [MainThread]: Using postgres connection "master"
+[0m00:30:19.142366 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "master"} */
+select distinct
+        dependent_namespace.nspname as dependent_schema,
+        dependent_class.relname as dependent_name,
+        referenced_namespace.nspname as referenced_schema,
+        referenced_class.relname as referenced_name
+
+    -- Query for views: views are entries in pg_class with an entry in pg_rewrite, but we avoid
+    -- a seq scan on pg_rewrite by leveraging the fact there is an "internal" row in pg_depend for
+    -- the view...
+    from pg_class as dependent_class
+    join pg_namespace as dependent_namespace on dependent_namespace.oid = dependent_class.relnamespace
+    join pg_depend as dependent_depend on dependent_depend.refobjid = dependent_class.oid
+        and dependent_depend.classid = 'pg_rewrite'::regclass
+        and dependent_depend.refclassid = 'pg_class'::regclass
+        and dependent_depend.deptype = 'i'
+
+    -- ... and via pg_depend (that has a row per column, hence the need for "distinct" above, and
+    -- making sure to exclude the internal row to avoid a view appearing to depend on itself)...
+    join pg_depend as joining_depend on joining_depend.objid = dependent_depend.objid
+        and joining_depend.classid = 'pg_rewrite'::regclass
+        and joining_depend.refclassid = 'pg_class'::regclass
+        and joining_depend.refobjid != dependent_depend.refobjid
+
+    -- ... we can find the tables they query from in pg_class, but excluding system tables. Note we
+    -- don't need need to exclude _dependent_ system tables, because they only query from other
+    -- system tables, and so are automatically excluded by excluding _referenced_ system tables
+    join pg_class as referenced_class on referenced_class.oid = joining_depend.refobjid
+    join pg_namespace as referenced_namespace on referenced_namespace.oid = referenced_class.relnamespace
+        and referenced_namespace.nspname != 'information_schema'
+        and referenced_namespace.nspname not like 'pg\_%'
+
+    order by
+        dependent_schema, dependent_name, referenced_schema, referenced_name;
+[0m00:30:19.142723 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m00:30:19.149891 [debug] [MainThread]: SQL status: SELECT 2 in 0.007 seconds
+[0m00:30:19.152054 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe05ff74d0>]}
+[0m00:30:19.152717 [debug] [MainThread]: On master: ROLLBACK
+[0m00:30:19.153437 [debug] [MainThread]: On master: COMMIT
+[0m00:30:19.153930 [debug] [MainThread]: Using postgres connection "master"
+[0m00:30:19.154385 [debug] [MainThread]: On master: COMMIT
+[0m00:30:19.155077 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m00:30:19.155567 [debug] [MainThread]: On master: Close
+[0m00:30:19.158146 [debug] [Thread-1 (]: Began running node model.finance.lead_lag
+[0m00:30:19.158977 [info ] [Thread-1 (]: 1 of 3 START sql view model lead_lag_analysis.lead_lag ......................... [RUN]
+[0m00:30:19.159661 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_datalake_lead_lag_analysis, now model.finance.lead_lag)
+[0m00:30:19.160201 [debug] [Thread-1 (]: Began compiling node model.finance.lead_lag
+[0m00:30:19.165823 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.lead_lag"
+[0m00:30:19.166486 [debug] [Thread-1 (]: Began executing node model.finance.lead_lag
+[0m00:30:19.194523 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.lead_lag"
+[0m00:30:19.195315 [debug] [Thread-1 (]: Using postgres connection "model.finance.lead_lag"
+[0m00:30:19.195648 [debug] [Thread-1 (]: On model.finance.lead_lag: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.lead_lag"} */
+
+  create view "datalake"."lead_lag_analysis"."lead_lag__dbt_tmp"
+    
+    
+  as (
+    with lead_lag as (
+  SELECT *
+  FROM '../../../data/usage/finance/lead_lag_analysis/**/*.parquet'
+)
+
+SELECT * 
+FROM lead_lag
+  );
+[0m00:30:19.195904 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:30:19.200929 [debug] [Thread-1 (]: Postgres adapter: Postgres error: syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+               ^
+
+[0m00:30:19.201731 [debug] [Thread-1 (]: On model.finance.lead_lag: ROLLBACK
+[0m00:30:19.202767 [debug] [Thread-1 (]: On model.finance.lead_lag: Close
+[0m00:30:19.207923 [debug] [Thread-1 (]: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m00:30:19.210147 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe08899ac0>]}
+[0m00:30:19.210845 [error] [Thread-1 (]: 1 of 3 ERROR creating sql view model lead_lag_analysis.lead_lag ................ [[31mERROR[0m in 0.05s]
+[0m00:30:19.211380 [debug] [Thread-1 (]: Finished running node model.finance.lead_lag
+[0m00:30:19.211745 [debug] [Thread-1 (]: Began running node model.finance.my_first_dbt_model
+[0m00:30:19.212394 [debug] [Thread-4 (]: Marking all children of 'model.finance.lead_lag' to be skipped because of status 'error'.  Reason: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql.
+[0m00:30:19.213129 [info ] [Thread-1 (]: 2 of 3 START sql table model lead_lag_analysis.my_first_dbt_model .............. [RUN]
+[0m00:30:19.214680 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.lead_lag, now model.finance.my_first_dbt_model)
+[0m00:30:19.215041 [debug] [Thread-1 (]: Began compiling node model.finance.my_first_dbt_model
+[0m00:30:19.217441 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_first_dbt_model"
+[0m00:30:19.218015 [debug] [Thread-1 (]: Began executing node model.finance.my_first_dbt_model
+[0m00:30:19.239863 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_first_dbt_model"
+[0m00:30:19.241099 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:30:19.241783 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+
+  
+    
+
+  create  table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp"
+  
+  
+    as
+  
+  (
+    /*
+    Welcome to your first dbt model!
+    Did you know that you can also configure models directly within SQL files?
+    This will override configurations stated in dbt_project.yml
+
+    Try changing "table" to "view" below
+*/
+
+
+
+with source_data as (
+
+    select 1 as id
+    union all
+    select null as id
+
+)
+
+select *
+from source_data
+
+/*
+    Uncomment the line below to remove records with null `id` values
+*/
+
+-- where id is not null
+  );
+  
+[0m00:30:19.242383 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:30:19.249186 [debug] [Thread-1 (]: SQL status: SELECT 2 in 0.007 seconds
+[0m00:30:19.258798 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:30:19.259290 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model" rename to "my_first_dbt_model__dbt_backup"
+[0m00:30:19.260304 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m00:30:19.264345 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:30:19.265024 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp" rename to "my_first_dbt_model"
+[0m00:30:19.266211 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m00:30:19.282291 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m00:30:19.282748 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:30:19.283019 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m00:30:19.285264 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m00:30:19.293003 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup"
+[0m00:30:19.297203 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m00:30:19.297576 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+drop table if exists "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup" cascade
+[0m00:30:19.300860 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.003 seconds
+[0m00:30:19.304085 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: Close
+[0m00:30:19.304945 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe0a3eb2c0>]}
+[0m00:30:19.305498 [info ] [Thread-1 (]: 2 of 3 OK created sql table model lead_lag_analysis.my_first_dbt_model ......... [[32mSELECT 2[0m in 0.09s]
+[0m00:30:19.305937 [debug] [Thread-1 (]: Finished running node model.finance.my_first_dbt_model
+[0m00:30:19.306917 [debug] [Thread-1 (]: Began running node model.finance.my_second_dbt_model
+[0m00:30:19.307340 [info ] [Thread-1 (]: 3 of 3 START sql view model lead_lag_analysis.my_second_dbt_model .............. [RUN]
+[0m00:30:19.307702 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.my_first_dbt_model, now model.finance.my_second_dbt_model)
+[0m00:30:19.307978 [debug] [Thread-1 (]: Began compiling node model.finance.my_second_dbt_model
+[0m00:30:19.309970 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_second_dbt_model"
+[0m00:30:19.310420 [debug] [Thread-1 (]: Began executing node model.finance.my_second_dbt_model
+[0m00:30:19.313840 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_second_dbt_model"
+[0m00:30:19.314302 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:30:19.314590 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+
+  create view "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp"
+    
+    
+  as (
+    -- Use the `ref` function to select from other models
+
+select *
+from "datalake"."lead_lag_analysis"."my_first_dbt_model"
+where id = 1
+  );
+[0m00:30:19.314843 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m00:30:19.319933 [debug] [Thread-1 (]: SQL status: CREATE VIEW in 0.005 seconds
+[0m00:30:19.323010 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:30:19.323443 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp" rename to "my_second_dbt_model"
+[0m00:30:19.324436 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m00:30:19.326683 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m00:30:19.327304 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:30:19.327840 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m00:30:19.330315 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m00:30:19.333203 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup"
+[0m00:30:19.336096 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m00:30:19.336474 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+drop view if exists "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup" cascade
+[0m00:30:19.337385 [debug] [Thread-1 (]: SQL status: DROP VIEW in 0.001 seconds
+[0m00:30:19.338572 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: Close
+[0m00:30:19.339090 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '82acdf39-26ab-4c5a-801f-08eca1fafc62', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe046c2870>]}
+[0m00:30:19.339681 [info ] [Thread-1 (]: 3 of 3 OK created sql view model lead_lag_analysis.my_second_dbt_model ......... [[32mCREATE VIEW[0m in 0.03s]
+[0m00:30:19.340144 [debug] [Thread-1 (]: Finished running node model.finance.my_second_dbt_model
+[0m00:30:19.341322 [debug] [MainThread]: On master: COMMIT
+[0m00:30:19.341617 [debug] [MainThread]: Using postgres connection "master"
+[0m00:30:19.341850 [debug] [MainThread]: On master: COMMIT
+[0m00:30:19.342059 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m00:30:19.345660 [debug] [MainThread]: SQL status: COMMIT in 0.004 seconds
+[0m00:30:19.345960 [debug] [MainThread]: On master: Close
+[0m00:30:19.346293 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m00:30:19.346519 [debug] [MainThread]: Connection 'model.finance.my_second_dbt_model' was properly closed.
+[0m00:30:19.346796 [info ] [MainThread]: 
+[0m00:30:19.347040 [info ] [MainThread]: Finished running 1 table model, 2 view models in 0 hours 0 minutes and 0.28 seconds (0.28s).
+[0m00:30:19.347661 [debug] [MainThread]: Command end result
+[0m00:30:19.358751 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m00:30:19.360649 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m00:30:19.365044 [debug] [MainThread]: Wrote artifact RunExecutionResult to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/run_results.json
+[0m00:30:19.365428 [info ] [MainThread]: 
+[0m00:30:19.365730 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m00:30:19.365979 [info ] [MainThread]: 
+[0m00:30:19.366269 [error] [MainThread]: [31mFailure in model lead_lag (models/finance/lead_lag.sql)[0m
+[0m00:30:19.366540 [error] [MainThread]:   Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../../../data/usage/finance/lead_lag_analysis/**/*.parquet'"
+  LINE 9:   FROM '../../../data/usage/finance/lead_lag_analysis/**/*.p...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m00:30:19.366751 [info ] [MainThread]: 
+[0m00:30:19.367006 [info ] [MainThread]:   compiled code at target/compiled/finance/models/finance/lead_lag.sql
+[0m00:30:19.367225 [info ] [MainThread]: 
+[0m00:30:19.367458 [info ] [MainThread]: Done. PASS=2 WARN=0 ERROR=1 SKIP=0 NO-OP=0 TOTAL=3
+[0m00:30:19.368164 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.7589488, "process_in_blocks": "0", "process_kernel_time": 0.108757, "process_mem_max_rss": "124488", "process_out_blocks": "1944", "process_user_time": 1.733142}
+[0m00:30:19.368580 [debug] [MainThread]: Command `dbt run` failed at 00:30:19.368503 after 0.76 seconds
+[0m00:30:19.368887 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe07ec3ef0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe082aa780>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7bbe078302f0>]}
+[0m00:30:19.369184 [debug] [MainThread]: Flushing usage events
+[0m00:30:19.802565 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m09:53:49.124431 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fec82b1a0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fec308c20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fec829520>]}
+
+
+============================== 09:53:49.128877 | 4b897e26-882a-4aa1-bc86-41eb47a29c7a ==============================
+[0m09:53:49.128877 [info ] [MainThread]: Running with dbt=1.11.6
+[0m09:53:49.129765 [debug] [MainThread]: running dbt with arguments {'target_path': 'None', 'log_cache_events': 'False', 'static_parser': 'True', 'quiet': 'False', 'write_json': 'True', 'use_experimental_parser': 'False', 'send_anonymous_usage_stats': 'True', 'log_format': 'default', 'indirect_selection': 'eager', 'invocation_command': 'dbt run', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'use_colors': 'True', 'debug': 'False', 'printer_width': '80', 'introspect': 'True', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'version_check': 'True', 'no_print': 'None', 'empty': 'False', 'profiles_dir': '/home/djnaguro/.dbt', 'warn_error': 'None', 'cache_selected_only': 'False', 'fail_fast': 'False', 'partial_parse': 'True'}
+[0m09:53:49.366738 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794feea4bf20>]}
+[0m09:53:49.452455 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794feceb0560>]}
+[0m09:53:49.453510 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m09:53:49.544241 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m09:53:49.669201 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 1 files changed.
+[0m09:53:49.669978 [debug] [MainThread]: Partial parsing: updated file: finance://models/finance/lead_lag.sql
+[0m09:53:49.992068 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fead1d790>]}
+[0m09:53:50.067617 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m09:53:50.069669 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m09:53:50.083850 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fea165d00>]}
+[0m09:53:50.084455 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m09:53:50.084901 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fea1b1430>]}
+[0m09:53:50.087131 [info ] [MainThread]: 
+[0m09:53:50.087633 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m09:53:50.088029 [info ] [MainThread]: 
+[0m09:53:50.088595 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m09:53:50.093559 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m09:53:50.128802 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m09:53:50.129451 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m09:53:50.129907 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m09:53:50.139289 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.009 seconds
+[0m09:53:50.141786 [debug] [ThreadPool]: On list_datalake: Close
+[0m09:53:50.144357 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_datalake, now list_datalake_lead_lag_analysis)
+[0m09:53:50.156443 [debug] [ThreadPool]: Using postgres connection "list_datalake_lead_lag_analysis"
+[0m09:53:50.157322 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake_lead_lag_analysis"} */
+select
+      'datalake' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'lead_lag_analysis'
+  
+[0m09:53:50.157965 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m09:53:50.168465 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.010 seconds
+[0m09:53:50.170571 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: ROLLBACK
+[0m09:53:50.171896 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: Close
+[0m09:53:50.179113 [debug] [MainThread]: Using postgres connection "master"
+[0m09:53:50.179887 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "master"} */
+select distinct
+        dependent_namespace.nspname as dependent_schema,
+        dependent_class.relname as dependent_name,
+        referenced_namespace.nspname as referenced_schema,
+        referenced_class.relname as referenced_name
+
+    -- Query for views: views are entries in pg_class with an entry in pg_rewrite, but we avoid
+    -- a seq scan on pg_rewrite by leveraging the fact there is an "internal" row in pg_depend for
+    -- the view...
+    from pg_class as dependent_class
+    join pg_namespace as dependent_namespace on dependent_namespace.oid = dependent_class.relnamespace
+    join pg_depend as dependent_depend on dependent_depend.refobjid = dependent_class.oid
+        and dependent_depend.classid = 'pg_rewrite'::regclass
+        and dependent_depend.refclassid = 'pg_class'::regclass
+        and dependent_depend.deptype = 'i'
+
+    -- ... and via pg_depend (that has a row per column, hence the need for "distinct" above, and
+    -- making sure to exclude the internal row to avoid a view appearing to depend on itself)...
+    join pg_depend as joining_depend on joining_depend.objid = dependent_depend.objid
+        and joining_depend.classid = 'pg_rewrite'::regclass
+        and joining_depend.refclassid = 'pg_class'::regclass
+        and joining_depend.refobjid != dependent_depend.refobjid
+
+    -- ... we can find the tables they query from in pg_class, but excluding system tables. Note we
+    -- don't need need to exclude _dependent_ system tables, because they only query from other
+    -- system tables, and so are automatically excluded by excluding _referenced_ system tables
+    join pg_class as referenced_class on referenced_class.oid = joining_depend.refobjid
+    join pg_namespace as referenced_namespace on referenced_namespace.oid = referenced_class.relnamespace
+        and referenced_namespace.nspname != 'information_schema'
+        and referenced_namespace.nspname not like 'pg\_%'
+
+    order by
+        dependent_schema, dependent_name, referenced_schema, referenced_name;
+[0m09:53:50.180525 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m09:53:50.192511 [debug] [MainThread]: SQL status: SELECT 2 in 0.012 seconds
+[0m09:53:50.195463 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794feb5214c0>]}
+[0m09:53:50.196270 [debug] [MainThread]: On master: ROLLBACK
+[0m09:53:50.197403 [debug] [MainThread]: On master: COMMIT
+[0m09:53:50.198229 [debug] [MainThread]: Using postgres connection "master"
+[0m09:53:50.199078 [debug] [MainThread]: On master: COMMIT
+[0m09:53:50.200281 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m09:53:50.201260 [debug] [MainThread]: On master: Close
+[0m09:53:50.204782 [debug] [Thread-1 (]: Began running node model.finance.lead_lag
+[0m09:53:50.205959 [info ] [Thread-1 (]: 1 of 3 START sql view model lead_lag_analysis.lead_lag ......................... [RUN]
+[0m09:53:50.206915 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_datalake_lead_lag_analysis, now model.finance.lead_lag)
+[0m09:53:50.207711 [debug] [Thread-1 (]: Began compiling node model.finance.lead_lag
+[0m09:53:50.218593 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.lead_lag"
+[0m09:53:50.219623 [debug] [Thread-1 (]: Began executing node model.finance.lead_lag
+[0m09:53:50.283883 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.lead_lag"
+[0m09:53:50.285099 [debug] [Thread-1 (]: Using postgres connection "model.finance.lead_lag"
+[0m09:53:50.285844 [debug] [Thread-1 (]: On model.finance.lead_lag: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.lead_lag"} */
+
+  create view "datalake"."lead_lag_analysis"."lead_lag__dbt_tmp"
+    
+    
+  as (
+    with lead_lag as (
+  SELECT *
+  FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'
+)
+
+SELECT * 
+FROM lead_lag
+  );
+[0m09:53:50.286470 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m09:53:50.293186 [debug] [Thread-1 (]: Postgres adapter: Postgres error: syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+               ^
+
+[0m09:53:50.294174 [debug] [Thread-1 (]: On model.finance.lead_lag: ROLLBACK
+[0m09:53:50.295586 [debug] [Thread-1 (]: On model.finance.lead_lag: Close
+[0m09:53:50.300942 [debug] [Thread-1 (]: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+  LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m09:53:50.303672 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fea566540>]}
+[0m09:53:50.304877 [error] [Thread-1 (]: 1 of 3 ERROR creating sql view model lead_lag_analysis.lead_lag ................ [[31mERROR[0m in 0.09s]
+[0m09:53:50.305937 [debug] [Thread-1 (]: Finished running node model.finance.lead_lag
+[0m09:53:50.306670 [debug] [Thread-1 (]: Began running node model.finance.my_first_dbt_model
+[0m09:53:50.307486 [info ] [Thread-1 (]: 2 of 3 START sql table model lead_lag_analysis.my_first_dbt_model .............. [RUN]
+[0m09:53:50.308660 [debug] [Thread-4 (]: Marking all children of 'model.finance.lead_lag' to be skipped because of status 'error'.  Reason: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+  LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql.
+[0m09:53:50.309772 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.lead_lag, now model.finance.my_first_dbt_model)
+[0m09:53:50.311958 [debug] [Thread-1 (]: Began compiling node model.finance.my_first_dbt_model
+[0m09:53:50.318622 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_first_dbt_model"
+[0m09:53:50.319792 [debug] [Thread-1 (]: Began executing node model.finance.my_first_dbt_model
+[0m09:53:50.354308 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_first_dbt_model"
+[0m09:53:50.355277 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m09:53:50.355826 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+
+  
+    
+
+  create  table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp"
+  
+  
+    as
+  
+  (
+    /*
+    Welcome to your first dbt model!
+    Did you know that you can also configure models directly within SQL files?
+    This will override configurations stated in dbt_project.yml
+
+    Try changing "table" to "view" below
+*/
+
+
+
+with source_data as (
+
+    select 1 as id
+    union all
+    select null as id
+
+)
+
+select *
+from source_data
+
+/*
+    Uncomment the line below to remove records with null `id` values
+*/
+
+-- where id is not null
+  );
+  
+[0m09:53:50.356303 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m09:53:50.364319 [debug] [Thread-1 (]: SQL status: SELECT 2 in 0.008 seconds
+[0m09:53:50.380881 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m09:53:50.381614 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model" rename to "my_first_dbt_model__dbt_backup"
+[0m09:53:50.383175 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m09:53:50.387464 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m09:53:50.388128 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp" rename to "my_first_dbt_model"
+[0m09:53:50.389439 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m09:53:50.415115 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m09:53:50.415765 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m09:53:50.416234 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m09:53:50.418733 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m09:53:50.429569 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup"
+[0m09:53:50.440659 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m09:53:50.441694 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+drop table if exists "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup" cascade
+[0m09:53:50.446724 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.004 seconds
+[0m09:53:50.450685 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: Close
+[0m09:53:50.451826 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794feea4b0b0>]}
+[0m09:53:50.452917 [info ] [Thread-1 (]: 2 of 3 OK created sql table model lead_lag_analysis.my_first_dbt_model ......... [[32mSELECT 2[0m in 0.14s]
+[0m09:53:50.453827 [debug] [Thread-1 (]: Finished running node model.finance.my_first_dbt_model
+[0m09:53:50.455020 [debug] [Thread-1 (]: Began running node model.finance.my_second_dbt_model
+[0m09:53:50.455895 [info ] [Thread-1 (]: 3 of 3 START sql view model lead_lag_analysis.my_second_dbt_model .............. [RUN]
+[0m09:53:50.457147 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.my_first_dbt_model, now model.finance.my_second_dbt_model)
+[0m09:53:50.457844 [debug] [Thread-1 (]: Began compiling node model.finance.my_second_dbt_model
+[0m09:53:50.461543 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_second_dbt_model"
+[0m09:53:50.462458 [debug] [Thread-1 (]: Began executing node model.finance.my_second_dbt_model
+[0m09:53:50.467755 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_second_dbt_model"
+[0m09:53:50.468845 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m09:53:50.469521 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+
+  create view "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp"
+    
+    
+  as (
+    -- Use the `ref` function to select from other models
+
+select *
+from "datalake"."lead_lag_analysis"."my_first_dbt_model"
+where id = 1
+  );
+[0m09:53:50.470081 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m09:53:50.481221 [debug] [Thread-1 (]: SQL status: CREATE VIEW in 0.011 seconds
+[0m09:53:50.490062 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m09:53:50.491107 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp" rename to "my_second_dbt_model"
+[0m09:53:50.493214 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m09:53:50.495984 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m09:53:50.496764 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m09:53:50.497416 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m09:53:50.500198 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m09:53:50.506278 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup"
+[0m09:53:50.511475 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m09:53:50.512239 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+drop view if exists "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup" cascade
+[0m09:53:50.513719 [debug] [Thread-1 (]: SQL status: DROP VIEW in 0.001 seconds
+[0m09:53:50.516185 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: Close
+[0m09:53:50.517341 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '4b897e26-882a-4aa1-bc86-41eb47a29c7a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fe0cc0260>]}
+[0m09:53:50.518574 [info ] [Thread-1 (]: 3 of 3 OK created sql view model lead_lag_analysis.my_second_dbt_model ......... [[32mCREATE VIEW[0m in 0.06s]
+[0m09:53:50.519579 [debug] [Thread-1 (]: Finished running node model.finance.my_second_dbt_model
+[0m09:53:50.521604 [debug] [MainThread]: On master: COMMIT
+[0m09:53:50.522356 [debug] [MainThread]: Using postgres connection "master"
+[0m09:53:50.522948 [debug] [MainThread]: On master: COMMIT
+[0m09:53:50.523490 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m09:53:50.529508 [debug] [MainThread]: SQL status: COMMIT in 0.006 seconds
+[0m09:53:50.530245 [debug] [MainThread]: On master: Close
+[0m09:53:50.530984 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m09:53:50.531559 [debug] [MainThread]: Connection 'model.finance.my_second_dbt_model' was properly closed.
+[0m09:53:50.532182 [info ] [MainThread]: 
+[0m09:53:50.532744 [info ] [MainThread]: Finished running 1 table model, 2 view models in 0 hours 0 minutes and 0.44 seconds (0.44s).
+[0m09:53:50.534118 [debug] [MainThread]: Command end result
+[0m09:53:50.665292 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m09:53:50.668049 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m09:53:50.677117 [debug] [MainThread]: Wrote artifact RunExecutionResult to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/run_results.json
+[0m09:53:50.677775 [info ] [MainThread]: 
+[0m09:53:50.678312 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m09:53:50.678755 [info ] [MainThread]: 
+[0m09:53:50.679307 [error] [MainThread]: [31mFailure in model lead_lag (models/finance/lead_lag.sql)[0m
+[0m09:53:50.679803 [error] [MainThread]:   Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+  LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m09:53:50.680197 [info ] [MainThread]: 
+[0m09:53:50.680618 [info ] [MainThread]:   compiled code at target/compiled/finance/models/finance/lead_lag.sql
+[0m09:53:50.680978 [info ] [MainThread]: 
+[0m09:53:50.681421 [info ] [MainThread]: Done. PASS=2 WARN=0 ERROR=1 SKIP=0 NO-OP=0 TOTAL=3
+[0m09:53:50.682503 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 1.6380306, "process_in_blocks": "0", "process_kernel_time": 0.230354, "process_mem_max_rss": "128260", "process_out_blocks": "2888", "process_user_time": 3.477249}
+[0m09:53:50.683077 [debug] [MainThread]: Command `dbt run` failed at 09:53:50.682956 after 1.64 seconds
+[0m09:53:50.683560 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fea186e10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fececf4d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fe0ca3920>]}
+[0m09:53:50.684017 [debug] [MainThread]: Flushing usage events
+[0m09:53:51.118690 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m10:08:29.078871 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dde5534d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717ddc290da0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717ddb95b8f0>]}
+
+
+============================== 10:08:29.083928 | 71ad10fc-0cfc-4c39-a417-477ac2fa58bd ==============================
+[0m10:08:29.083928 [info ] [MainThread]: Running with dbt=1.11.6
+[0m10:08:29.084962 [debug] [MainThread]: running dbt with arguments {'use_experimental_parser': 'False', 'version_check': 'True', 'static_parser': 'True', 'empty': 'False', 'introspect': 'True', 'partial_parse': 'True', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'indirect_selection': 'eager', 'quiet': 'False', 'use_colors': 'True', 'log_cache_events': 'False', 'profiles_dir': '/home/djnaguro/.dbt', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'debug': 'False', 'write_json': 'True', 'printer_width': '80', 'no_print': 'None', 'send_anonymous_usage_stats': 'True', 'invocation_command': 'dbt run', 'cache_selected_only': 'False', 'log_format': 'default', 'warn_error': 'None', 'target_path': 'None', 'fail_fast': 'False'}
+[0m10:08:29.348993 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717ddc695100>]}
+[0m10:08:29.444021 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dde413560>]}
+[0m10:08:29.445564 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m10:08:29.541153 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m10:08:29.662545 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 0 files changed.
+[0m10:08:29.663118 [debug] [MainThread]: Nothing changed, skipping partial parsing.
+[0m10:08:29.663505 [debug] [MainThread]: Partial parsing enabled, no changes found, skipping parsing
+[0m10:08:29.708326 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dda36fd10>]}
+[0m10:08:29.785289 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m10:08:29.787133 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m10:08:29.801899 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dd9b39a30>]}
+[0m10:08:29.802581 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m10:08:29.803040 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dda37f8f0>]}
+[0m10:08:29.805327 [info ] [MainThread]: 
+[0m10:08:29.805858 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m10:08:29.806263 [info ] [MainThread]: 
+[0m10:08:29.806874 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m10:08:29.812312 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m10:08:29.850069 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m10:08:29.851011 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m10:08:29.851598 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m10:08:29.862424 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.011 seconds
+[0m10:08:29.865622 [debug] [ThreadPool]: On list_datalake: Close
+[0m10:08:29.868523 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_datalake, now list_datalake_lead_lag_analysis)
+[0m10:08:29.879625 [debug] [ThreadPool]: Using postgres connection "list_datalake_lead_lag_analysis"
+[0m10:08:29.880320 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake_lead_lag_analysis"} */
+select
+      'datalake' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'lead_lag_analysis'
+  
+[0m10:08:29.880895 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m10:08:29.891265 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.010 seconds
+[0m10:08:29.893316 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: ROLLBACK
+[0m10:08:29.894440 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: Close
+[0m10:08:29.901492 [debug] [MainThread]: Using postgres connection "master"
+[0m10:08:29.902297 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "master"} */
+select distinct
+        dependent_namespace.nspname as dependent_schema,
+        dependent_class.relname as dependent_name,
+        referenced_namespace.nspname as referenced_schema,
+        referenced_class.relname as referenced_name
+
+    -- Query for views: views are entries in pg_class with an entry in pg_rewrite, but we avoid
+    -- a seq scan on pg_rewrite by leveraging the fact there is an "internal" row in pg_depend for
+    -- the view...
+    from pg_class as dependent_class
+    join pg_namespace as dependent_namespace on dependent_namespace.oid = dependent_class.relnamespace
+    join pg_depend as dependent_depend on dependent_depend.refobjid = dependent_class.oid
+        and dependent_depend.classid = 'pg_rewrite'::regclass
+        and dependent_depend.refclassid = 'pg_class'::regclass
+        and dependent_depend.deptype = 'i'
+
+    -- ... and via pg_depend (that has a row per column, hence the need for "distinct" above, and
+    -- making sure to exclude the internal row to avoid a view appearing to depend on itself)...
+    join pg_depend as joining_depend on joining_depend.objid = dependent_depend.objid
+        and joining_depend.classid = 'pg_rewrite'::regclass
+        and joining_depend.refclassid = 'pg_class'::regclass
+        and joining_depend.refobjid != dependent_depend.refobjid
+
+    -- ... we can find the tables they query from in pg_class, but excluding system tables. Note we
+    -- don't need need to exclude _dependent_ system tables, because they only query from other
+    -- system tables, and so are automatically excluded by excluding _referenced_ system tables
+    join pg_class as referenced_class on referenced_class.oid = joining_depend.refobjid
+    join pg_namespace as referenced_namespace on referenced_namespace.oid = referenced_class.relnamespace
+        and referenced_namespace.nspname != 'information_schema'
+        and referenced_namespace.nspname not like 'pg\_%'
+
+    order by
+        dependent_schema, dependent_name, referenced_schema, referenced_name;
+[0m10:08:29.902974 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m10:08:29.915232 [debug] [MainThread]: SQL status: SELECT 2 in 0.012 seconds
+[0m10:08:29.917687 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717ddab516d0>]}
+[0m10:08:29.918446 [debug] [MainThread]: On master: ROLLBACK
+[0m10:08:29.919740 [debug] [MainThread]: On master: COMMIT
+[0m10:08:29.920416 [debug] [MainThread]: Using postgres connection "master"
+[0m10:08:29.920946 [debug] [MainThread]: On master: COMMIT
+[0m10:08:29.922239 [debug] [MainThread]: SQL status: COMMIT in 0.001 seconds
+[0m10:08:29.922895 [debug] [MainThread]: On master: Close
+[0m10:08:29.926790 [debug] [Thread-1 (]: Began running node model.finance.lead_lag
+[0m10:08:29.927968 [info ] [Thread-1 (]: 1 of 3 START sql view model lead_lag_analysis.lead_lag ......................... [RUN]
+[0m10:08:29.928969 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_datalake_lead_lag_analysis, now model.finance.lead_lag)
+[0m10:08:29.929813 [debug] [Thread-1 (]: Began compiling node model.finance.lead_lag
+[0m10:08:29.942022 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.lead_lag"
+[0m10:08:29.943588 [debug] [Thread-1 (]: Began executing node model.finance.lead_lag
+[0m10:08:30.009984 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.lead_lag"
+[0m10:08:30.010922 [debug] [Thread-1 (]: Using postgres connection "model.finance.lead_lag"
+[0m10:08:30.011440 [debug] [Thread-1 (]: On model.finance.lead_lag: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.lead_lag"} */
+
+  create view "datalake"."lead_lag_analysis"."lead_lag__dbt_tmp"
+    
+    
+  as (
+    with lead_lag as (
+  SELECT *
+  FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'
+)
+
+SELECT * 
+FROM lead_lag
+  );
+[0m10:08:30.011893 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m10:08:30.018390 [debug] [Thread-1 (]: Postgres adapter: Postgres error: syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+               ^
+
+[0m10:08:30.019656 [debug] [Thread-1 (]: On model.finance.lead_lag: ROLLBACK
+[0m10:08:30.021286 [debug] [Thread-1 (]: On model.finance.lead_lag: Close
+[0m10:08:30.028604 [debug] [Thread-1 (]: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+  LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m10:08:30.032333 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dd8788890>]}
+[0m10:08:30.033987 [error] [Thread-1 (]: 1 of 3 ERROR creating sql view model lead_lag_analysis.lead_lag ................ [[31mERROR[0m in 0.10s]
+[0m10:08:30.035215 [debug] [Thread-1 (]: Finished running node model.finance.lead_lag
+[0m10:08:30.035915 [debug] [Thread-1 (]: Began running node model.finance.my_first_dbt_model
+[0m10:08:30.036740 [info ] [Thread-1 (]: 2 of 3 START sql table model lead_lag_analysis.my_first_dbt_model .............. [RUN]
+[0m10:08:30.037545 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.lead_lag, now model.finance.my_first_dbt_model)
+[0m10:08:30.038253 [debug] [Thread-1 (]: Began compiling node model.finance.my_first_dbt_model
+[0m10:08:30.042734 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_first_dbt_model"
+[0m10:08:30.044100 [debug] [Thread-4 (]: Marking all children of 'model.finance.lead_lag' to be skipped because of status 'error'.  Reason: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+  LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql.
+[0m10:08:30.046676 [debug] [Thread-1 (]: Began executing node model.finance.my_first_dbt_model
+[0m10:08:30.086550 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_first_dbt_model"
+[0m10:08:30.088123 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:08:30.089029 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+
+  
+    
+
+  create  table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp"
+  
+  
+    as
+  
+  (
+    /*
+    Welcome to your first dbt model!
+    Did you know that you can also configure models directly within SQL files?
+    This will override configurations stated in dbt_project.yml
+
+    Try changing "table" to "view" below
+*/
+
+
+
+with source_data as (
+
+    select 1 as id
+    union all
+    select null as id
+
+)
+
+select *
+from source_data
+
+/*
+    Uncomment the line below to remove records with null `id` values
+*/
+
+-- where id is not null
+  );
+  
+[0m10:08:30.089851 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m10:08:30.098955 [debug] [Thread-1 (]: SQL status: SELECT 2 in 0.009 seconds
+[0m10:08:30.114731 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:08:30.115483 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model" rename to "my_first_dbt_model__dbt_backup"
+[0m10:08:30.117251 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m10:08:30.121794 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:08:30.122504 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp" rename to "my_first_dbt_model"
+[0m10:08:30.124029 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m10:08:30.150495 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m10:08:30.151278 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:08:30.151894 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m10:08:30.154694 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m10:08:30.166717 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup"
+[0m10:08:30.177068 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:08:30.178012 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+drop table if exists "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup" cascade
+[0m10:08:30.182840 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.004 seconds
+[0m10:08:30.187276 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: Close
+[0m10:08:30.188427 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dde34b170>]}
+[0m10:08:30.189614 [info ] [Thread-1 (]: 2 of 3 OK created sql table model lead_lag_analysis.my_first_dbt_model ......... [[32mSELECT 2[0m in 0.15s]
+[0m10:08:30.190715 [debug] [Thread-1 (]: Finished running node model.finance.my_first_dbt_model
+[0m10:08:30.192624 [debug] [Thread-1 (]: Began running node model.finance.my_second_dbt_model
+[0m10:08:30.193636 [info ] [Thread-1 (]: 3 of 3 START sql view model lead_lag_analysis.my_second_dbt_model .............. [RUN]
+[0m10:08:30.194450 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.my_first_dbt_model, now model.finance.my_second_dbt_model)
+[0m10:08:30.195115 [debug] [Thread-1 (]: Began compiling node model.finance.my_second_dbt_model
+[0m10:08:30.199029 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_second_dbt_model"
+[0m10:08:30.199964 [debug] [Thread-1 (]: Began executing node model.finance.my_second_dbt_model
+[0m10:08:30.207524 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_second_dbt_model"
+[0m10:08:30.208743 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:08:30.209482 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+
+  create view "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp"
+    
+    
+  as (
+    -- Use the `ref` function to select from other models
+
+select *
+from "datalake"."lead_lag_analysis"."my_first_dbt_model"
+where id = 1
+  );
+[0m10:08:30.210100 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m10:08:30.220830 [debug] [Thread-1 (]: SQL status: CREATE VIEW in 0.010 seconds
+[0m10:08:30.227415 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:08:30.228824 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp" rename to "my_second_dbt_model"
+[0m10:08:30.231563 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.002 seconds
+[0m10:08:30.234685 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m10:08:30.235485 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:08:30.236191 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m10:08:30.239236 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m10:08:30.243283 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup"
+[0m10:08:30.249221 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:08:30.250087 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+drop view if exists "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup" cascade
+[0m10:08:30.251913 [debug] [Thread-1 (]: SQL status: DROP VIEW in 0.001 seconds
+[0m10:08:30.254763 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: Close
+[0m10:08:30.255864 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '71ad10fc-0cfc-4c39-a417-477ac2fa58bd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dd8513dd0>]}
+[0m10:08:30.257002 [info ] [Thread-1 (]: 3 of 3 OK created sql view model lead_lag_analysis.my_second_dbt_model ......... [[32mCREATE VIEW[0m in 0.06s]
+[0m10:08:30.258045 [debug] [Thread-1 (]: Finished running node model.finance.my_second_dbt_model
+[0m10:08:30.260643 [debug] [MainThread]: On master: COMMIT
+[0m10:08:30.261398 [debug] [MainThread]: Using postgres connection "master"
+[0m10:08:30.261979 [debug] [MainThread]: On master: COMMIT
+[0m10:08:30.262557 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m10:08:30.268304 [debug] [MainThread]: SQL status: COMMIT in 0.006 seconds
+[0m10:08:30.269030 [debug] [MainThread]: On master: Close
+[0m10:08:30.269857 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m10:08:30.270437 [debug] [MainThread]: Connection 'model.finance.my_second_dbt_model' was properly closed.
+[0m10:08:30.271120 [info ] [MainThread]: 
+[0m10:08:30.271758 [info ] [MainThread]: Finished running 1 table model, 2 view models in 0 hours 0 minutes and 0.46 seconds (0.46s).
+[0m10:08:30.273243 [debug] [MainThread]: Command end result
+[0m10:08:30.307946 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m10:08:30.311967 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m10:08:30.325444 [debug] [MainThread]: Wrote artifact RunExecutionResult to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/run_results.json
+[0m10:08:30.326438 [info ] [MainThread]: 
+[0m10:08:30.327333 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m10:08:30.328153 [info ] [MainThread]: 
+[0m10:08:30.329227 [error] [MainThread]: [31mFailure in model lead_lag (models/finance/lead_lag.sql)[0m
+[0m10:08:30.330292 [error] [MainThread]:   Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "'../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'"
+  LINE 9:   FROM '../data/usage/finance/lead_lag_analysis/dt=2026-02-2...
+                 ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m10:08:30.331105 [info ] [MainThread]: 
+[0m10:08:30.332036 [info ] [MainThread]:   compiled code at target/compiled/finance/models/finance/lead_lag.sql
+[0m10:08:30.332802 [info ] [MainThread]: 
+[0m10:08:30.333581 [info ] [MainThread]: Done. PASS=2 WARN=0 ERROR=1 SKIP=0 NO-OP=0 TOTAL=3
+[0m10:08:30.335620 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 1.3382455, "process_in_blocks": "0", "process_kernel_time": 0.197559, "process_mem_max_rss": "124360", "process_out_blocks": "1952", "process_user_time": 3.032234}
+[0m10:08:30.336739 [debug] [MainThread]: Command `dbt run` failed at 10:08:30.336520 after 1.34 seconds
+[0m10:08:30.337590 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717ddc683ef0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717ddb7a0c50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x717dd86d3ad0>]}
+[0m10:08:30.338556 [debug] [MainThread]: Flushing usage events
+[0m10:08:30.800076 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m10:09:12.195547 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cfc8a870>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312d062b320>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312ce641100>]}
+
+
+============================== 10:09:12.199798 | 63371c95-b2de-46b9-8221-1ea77937bbcd ==============================
+[0m10:09:12.199798 [info ] [MainThread]: Running with dbt=1.11.6
+[0m10:09:12.200613 [debug] [MainThread]: running dbt with arguments {'fail_fast': 'False', 'write_json': 'True', 'printer_width': '80', 'partial_parse': 'True', 'target_path': 'None', 'log_format': 'default', 'quiet': 'False', 'no_print': 'None', 'log_cache_events': 'False', 'empty': 'False', 'version_check': 'True', 'send_anonymous_usage_stats': 'True', 'indirect_selection': 'eager', 'static_parser': 'True', 'introspect': 'True', 'debug': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'profiles_dir': '/home/djnaguro/.dbt', 'log_path': '/home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/logs', 'warn_error': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'cache_selected_only': 'False', 'invocation_command': 'dbt run'}
+[0m10:09:12.423031 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cd85f860>]}
+[0m10:09:12.515025 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cda51610>]}
+[0m10:09:12.517089 [info ] [MainThread]: Registered adapter: postgres=1.10.0
+[0m10:09:12.612455 [debug] [MainThread]: checksum: ec27062d18352e9cfca161c166fcc73d2201661a23a3cf3c89196a27f32cfcb8, vars: {}, profile: , target: , version: 1.11.6
+[0m10:09:12.736417 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 1 files changed.
+[0m10:09:12.737277 [debug] [MainThread]: Partial parsing: updated file: finance://models/finance/lead_lag.sql
+[0m10:09:13.063470 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cb788860>]}
+[0m10:09:13.139012 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m10:09:13.141020 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m10:09:13.154879 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cb73dd00>]}
+[0m10:09:13.155497 [info ] [MainThread]: Found 3 models, 4 data tests, 464 macros
+[0m10:09:13.155952 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cbb5fc80>]}
+[0m10:09:13.158202 [info ] [MainThread]: 
+[0m10:09:13.158723 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m10:09:13.159119 [info ] [MainThread]: 
+[0m10:09:13.159710 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m10:09:13.164804 [debug] [ThreadPool]: Acquiring new postgres connection 'list_datalake'
+[0m10:09:13.200277 [debug] [ThreadPool]: Using postgres connection "list_datalake"
+[0m10:09:13.200871 [debug] [ThreadPool]: On list_datalake: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m10:09:13.201302 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m10:09:13.207665 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.006 seconds
+[0m10:09:13.209257 [debug] [ThreadPool]: On list_datalake: Close
+[0m10:09:13.211052 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_datalake, now list_datalake_lead_lag_analysis)
+[0m10:09:13.218952 [debug] [ThreadPool]: Using postgres connection "list_datalake_lead_lag_analysis"
+[0m10:09:13.219545 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "list_datalake_lead_lag_analysis"} */
+select
+      'datalake' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'lead_lag_analysis'
+    union all
+    select
+      'datalake' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'lead_lag_analysis'
+  
+[0m10:09:13.219967 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m10:09:13.229869 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.010 seconds
+[0m10:09:13.232679 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: ROLLBACK
+[0m10:09:13.234132 [debug] [ThreadPool]: On list_datalake_lead_lag_analysis: Close
+[0m10:09:13.241604 [debug] [MainThread]: Using postgres connection "master"
+[0m10:09:13.242338 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "connection_name": "master"} */
+select distinct
+        dependent_namespace.nspname as dependent_schema,
+        dependent_class.relname as dependent_name,
+        referenced_namespace.nspname as referenced_schema,
+        referenced_class.relname as referenced_name
+
+    -- Query for views: views are entries in pg_class with an entry in pg_rewrite, but we avoid
+    -- a seq scan on pg_rewrite by leveraging the fact there is an "internal" row in pg_depend for
+    -- the view...
+    from pg_class as dependent_class
+    join pg_namespace as dependent_namespace on dependent_namespace.oid = dependent_class.relnamespace
+    join pg_depend as dependent_depend on dependent_depend.refobjid = dependent_class.oid
+        and dependent_depend.classid = 'pg_rewrite'::regclass
+        and dependent_depend.refclassid = 'pg_class'::regclass
+        and dependent_depend.deptype = 'i'
+
+    -- ... and via pg_depend (that has a row per column, hence the need for "distinct" above, and
+    -- making sure to exclude the internal row to avoid a view appearing to depend on itself)...
+    join pg_depend as joining_depend on joining_depend.objid = dependent_depend.objid
+        and joining_depend.classid = 'pg_rewrite'::regclass
+        and joining_depend.refclassid = 'pg_class'::regclass
+        and joining_depend.refobjid != dependent_depend.refobjid
+
+    -- ... we can find the tables they query from in pg_class, but excluding system tables. Note we
+    -- don't need need to exclude _dependent_ system tables, because they only query from other
+    -- system tables, and so are automatically excluded by excluding _referenced_ system tables
+    join pg_class as referenced_class on referenced_class.oid = joining_depend.refobjid
+    join pg_namespace as referenced_namespace on referenced_namespace.oid = referenced_class.relnamespace
+        and referenced_namespace.nspname != 'information_schema'
+        and referenced_namespace.nspname not like 'pg\_%'
+
+    order by
+        dependent_schema, dependent_name, referenced_schema, referenced_name;
+[0m10:09:13.242926 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m10:09:13.253327 [debug] [MainThread]: SQL status: SELECT 2 in 0.010 seconds
+[0m10:09:13.255806 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cb73f0b0>]}
+[0m10:09:13.256608 [debug] [MainThread]: On master: ROLLBACK
+[0m10:09:13.257888 [debug] [MainThread]: On master: COMMIT
+[0m10:09:13.258939 [debug] [MainThread]: Using postgres connection "master"
+[0m10:09:13.259547 [debug] [MainThread]: On master: COMMIT
+[0m10:09:13.261333 [debug] [MainThread]: SQL status: COMMIT in 0.001 seconds
+[0m10:09:13.261990 [debug] [MainThread]: On master: Close
+[0m10:09:13.266030 [debug] [Thread-1 (]: Began running node model.finance.lead_lag
+[0m10:09:13.267347 [info ] [Thread-1 (]: 1 of 3 START sql view model lead_lag_analysis.lead_lag ......................... [RUN]
+[0m10:09:13.268195 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_datalake_lead_lag_analysis, now model.finance.lead_lag)
+[0m10:09:13.268840 [debug] [Thread-1 (]: Began compiling node model.finance.lead_lag
+[0m10:09:13.278716 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.lead_lag"
+[0m10:09:13.279739 [debug] [Thread-1 (]: Began executing node model.finance.lead_lag
+[0m10:09:13.338821 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.lead_lag"
+[0m10:09:13.339770 [debug] [Thread-1 (]: Using postgres connection "model.finance.lead_lag"
+[0m10:09:13.340320 [debug] [Thread-1 (]: On model.finance.lead_lag: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.lead_lag"} */
+
+  create view "datalake"."lead_lag_analysis"."lead_lag__dbt_tmp"
+    
+    
+  as (
+    with lead_lag as (
+  COPY *
+  FROM '../../../../data/usage/finance/lead_lag_analysis/dt=2026-02-21/data.parquet'
+)
+
+SELECT * 
+FROM lead_lag
+  );
+[0m10:09:13.340755 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m10:09:13.347266 [debug] [Thread-1 (]: Postgres adapter: Postgres error: syntax error at or near "COPY"
+LINE 8:   COPY *
+          ^
+
+[0m10:09:13.348433 [debug] [Thread-1 (]: On model.finance.lead_lag: ROLLBACK
+[0m10:09:13.349958 [debug] [Thread-1 (]: On model.finance.lead_lag: Close
+[0m10:09:13.357121 [debug] [Thread-1 (]: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "COPY"
+  LINE 8:   COPY *
+            ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m10:09:13.359869 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cb753830>]}
+[0m10:09:13.361066 [error] [Thread-1 (]: 1 of 3 ERROR creating sql view model lead_lag_analysis.lead_lag ................ [[31mERROR[0m in 0.09s]
+[0m10:09:13.362082 [debug] [Thread-1 (]: Finished running node model.finance.lead_lag
+[0m10:09:13.362765 [debug] [Thread-1 (]: Began running node model.finance.my_first_dbt_model
+[0m10:09:13.363533 [info ] [Thread-1 (]: 2 of 3 START sql table model lead_lag_analysis.my_first_dbt_model .............. [RUN]
+[0m10:09:13.364594 [debug] [Thread-4 (]: Marking all children of 'model.finance.lead_lag' to be skipped because of status 'error'.  Reason: Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "COPY"
+  LINE 8:   COPY *
+            ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql.
+[0m10:09:13.365622 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.lead_lag, now model.finance.my_first_dbt_model)
+[0m10:09:13.367954 [debug] [Thread-1 (]: Began compiling node model.finance.my_first_dbt_model
+[0m10:09:13.375597 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_first_dbt_model"
+[0m10:09:13.377085 [debug] [Thread-1 (]: Began executing node model.finance.my_first_dbt_model
+[0m10:09:13.417017 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_first_dbt_model"
+[0m10:09:13.418372 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:09:13.419197 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+
+  
+    
+
+  create  table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp"
+  
+  
+    as
+  
+  (
+    /*
+    Welcome to your first dbt model!
+    Did you know that you can also configure models directly within SQL files?
+    This will override configurations stated in dbt_project.yml
+
+    Try changing "table" to "view" below
+*/
+
+
+
+with source_data as (
+
+    select 1 as id
+    union all
+    select null as id
+
+)
+
+select *
+from source_data
+
+/*
+    Uncomment the line below to remove records with null `id` values
+*/
+
+-- where id is not null
+  );
+  
+[0m10:09:13.419926 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m10:09:13.429305 [debug] [Thread-1 (]: SQL status: SELECT 2 in 0.009 seconds
+[0m10:09:13.444511 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:09:13.445213 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model" rename to "my_first_dbt_model__dbt_backup"
+[0m10:09:13.446725 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m10:09:13.450897 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:09:13.451569 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_tmp" rename to "my_first_dbt_model"
+[0m10:09:13.453076 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m10:09:13.476824 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m10:09:13.477488 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:09:13.478048 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: COMMIT
+[0m10:09:13.480890 [debug] [Thread-1 (]: SQL status: COMMIT in 0.002 seconds
+[0m10:09:13.490197 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup"
+[0m10:09:13.497452 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_first_dbt_model"
+[0m10:09:13.498072 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_first_dbt_model"} */
+drop table if exists "datalake"."lead_lag_analysis"."my_first_dbt_model__dbt_backup" cascade
+[0m10:09:13.501926 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.003 seconds
+[0m10:09:13.505465 [debug] [Thread-1 (]: On model.finance.my_first_dbt_model: Close
+[0m10:09:13.506405 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312d03f30b0>]}
+[0m10:09:13.507378 [info ] [Thread-1 (]: 2 of 3 OK created sql table model lead_lag_analysis.my_first_dbt_model ......... [[32mSELECT 2[0m in 0.14s]
+[0m10:09:13.508224 [debug] [Thread-1 (]: Finished running node model.finance.my_first_dbt_model
+[0m10:09:13.509189 [debug] [Thread-1 (]: Began running node model.finance.my_second_dbt_model
+[0m10:09:13.509891 [info ] [Thread-1 (]: 3 of 3 START sql view model lead_lag_analysis.my_second_dbt_model .............. [RUN]
+[0m10:09:13.510802 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.finance.my_first_dbt_model, now model.finance.my_second_dbt_model)
+[0m10:09:13.511592 [debug] [Thread-1 (]: Began compiling node model.finance.my_second_dbt_model
+[0m10:09:13.514573 [debug] [Thread-1 (]: Writing injected SQL for node "model.finance.my_second_dbt_model"
+[0m10:09:13.515617 [debug] [Thread-1 (]: Began executing node model.finance.my_second_dbt_model
+[0m10:09:13.519539 [debug] [Thread-1 (]: Writing runtime sql for node "model.finance.my_second_dbt_model"
+[0m10:09:13.520241 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:09:13.520722 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+
+  create view "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp"
+    
+    
+  as (
+    -- Use the `ref` function to select from other models
+
+select *
+from "datalake"."lead_lag_analysis"."my_first_dbt_model"
+where id = 1
+  );
+[0m10:09:13.521152 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m10:09:13.529622 [debug] [Thread-1 (]: SQL status: CREATE VIEW in 0.008 seconds
+[0m10:09:13.534818 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:09:13.535568 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+alter table "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_tmp" rename to "my_second_dbt_model"
+[0m10:09:13.537334 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m10:09:13.540922 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m10:09:13.541687 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:09:13.542256 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: COMMIT
+[0m10:09:13.545660 [debug] [Thread-1 (]: SQL status: COMMIT in 0.003 seconds
+[0m10:09:13.552475 [debug] [Thread-1 (]: Applying DROP to: "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup"
+[0m10:09:13.558636 [debug] [Thread-1 (]: Using postgres connection "model.finance.my_second_dbt_model"
+[0m10:09:13.559443 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: /* {"app": "dbt", "dbt_version": "1.11.6", "profile_name": "finance", "target_name": "dev", "node_id": "model.finance.my_second_dbt_model"} */
+drop view if exists "datalake"."lead_lag_analysis"."my_second_dbt_model__dbt_backup" cascade
+[0m10:09:13.561001 [debug] [Thread-1 (]: SQL status: DROP VIEW in 0.001 seconds
+[0m10:09:13.563073 [debug] [Thread-1 (]: On model.finance.my_second_dbt_model: Close
+[0m10:09:13.563955 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '63371c95-b2de-46b9-8221-1ea77937bbcd', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312ba599520>]}
+[0m10:09:13.564944 [info ] [Thread-1 (]: 3 of 3 OK created sql view model lead_lag_analysis.my_second_dbt_model ......... [[32mCREATE VIEW[0m in 0.05s]
+[0m10:09:13.566331 [debug] [Thread-1 (]: Finished running node model.finance.my_second_dbt_model
+[0m10:09:13.568297 [debug] [MainThread]: On master: COMMIT
+[0m10:09:13.568959 [debug] [MainThread]: Using postgres connection "master"
+[0m10:09:13.569520 [debug] [MainThread]: On master: COMMIT
+[0m10:09:13.570005 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m10:09:13.576244 [debug] [MainThread]: SQL status: COMMIT in 0.006 seconds
+[0m10:09:13.577106 [debug] [MainThread]: On master: Close
+[0m10:09:13.578043 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m10:09:13.578672 [debug] [MainThread]: Connection 'model.finance.my_second_dbt_model' was properly closed.
+[0m10:09:13.579418 [info ] [MainThread]: 
+[0m10:09:13.580108 [info ] [MainThread]: Finished running 1 table model, 2 view models in 0 hours 0 minutes and 0.42 seconds (0.42s).
+[0m10:09:13.581736 [debug] [MainThread]: Command end result
+[0m10:09:13.727114 [debug] [MainThread]: Wrote artifact WritableManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/manifest.json
+[0m10:09:13.729758 [debug] [MainThread]: Wrote artifact SemanticManifest to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/semantic_manifest.json
+[0m10:09:13.736730 [debug] [MainThread]: Wrote artifact RunExecutionResult to /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/finance/target/run_results.json
+[0m10:09:13.737265 [info ] [MainThread]: 
+[0m10:09:13.737736 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m10:09:13.738134 [info ] [MainThread]: 
+[0m10:09:13.738621 [error] [MainThread]: [31mFailure in model lead_lag (models/finance/lead_lag.sql)[0m
+[0m10:09:13.739055 [error] [MainThread]:   Database Error in model lead_lag (models/finance/lead_lag.sql)
+  syntax error at or near "COPY"
+  LINE 8:   COPY *
+            ^
+  compiled code at target/run/finance/models/finance/lead_lag.sql
+[0m10:09:13.739434 [info ] [MainThread]: 
+[0m10:09:13.739848 [info ] [MainThread]:   compiled code at target/compiled/finance/models/finance/lead_lag.sql
+[0m10:09:13.740194 [info ] [MainThread]: 
+[0m10:09:13.740574 [info ] [MainThread]: Done. PASS=2 WARN=0 ERROR=1 SKIP=0 NO-OP=0 TOTAL=3
+[0m10:09:13.741578 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 1.6286998, "process_in_blocks": "0", "process_kernel_time": 0.179133, "process_mem_max_rss": "128180", "process_out_blocks": "2888", "process_user_time": 3.304455}
+[0m10:09:13.742198 [debug] [MainThread]: Command `dbt run` failed at 10:09:13.742070 after 1.63 seconds
+[0m10:09:13.742666 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312cfc8a870>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312ce490b60>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7312ba583770>]}
+[0m10:09:13.743123 [debug] [MainThread]: Flushing usage events
+[0m10:09:14.182353 [debug] [MainThread]: An error was encountered while trying to flush usage events
