@@ -34,17 +34,32 @@ def get_data_date(filepath: Path) -> Tuple[str | None, bool]:
         is_today = dt.fromisoformat(date_str) == today
     return (date_str, is_today)
         
-    
+ 
+def generate_docs(df):
+    for idx, row in df.iterrows():
+        doc = row.to_dict()
+        _id = doc["ts_minute_utc"].strftime("%Y-%m-%d %H:%M:%S")
+        # Convertir les timestamps en string ISO
+        for key, value in doc.items():
+            if isinstance(value, pd.Timestamp):
+                doc[key] = value.isoformat()
+            elif pd.isna(value):
+                doc[key] = None                
+        yield {
+            "_id": _id,
+            "_source": doc
+        }
+                   
     
 def elk_index(file_path: Path):
     # df = pd.read_parquet(file_path)
     df = pq.read_table(file_path).to_pandas()
-    # records = df.where(pd.notnull(df), None).to_dict(orient="records")
-    #records = df.fillna(None).to_dict(orient="records")
-    records = df.dropna().to_dict(orient="records")
+    df.drop_duplicates(subset="ts_minute_utc", inplace=True)
+    # records = df.dropna().to_dict(orient="records")
+    records = generate_docs(df)
     try:
-        helpers.bulk(client, records, index=ELK_INDEX)
-        print(f"{len(records)} records indexed from {file_path}")
+        success, _ = helpers.bulk(client, records, index=ELK_INDEX)
+        print(f"\n{success} records indexed from {file_path} of {len(df)} rows.\n")
         _, is_today = get_data_date(file_path)
         if not is_today:
             success_file = file_path.parent.joinpath("_ELKSUCCESS")
