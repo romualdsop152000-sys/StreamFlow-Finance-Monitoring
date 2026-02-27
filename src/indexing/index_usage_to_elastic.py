@@ -111,6 +111,7 @@ def main(execution_date: str):
         raise
 
 
+
 if __name__ == "__main__":
     args = parse_args()
     main(args.execution_date)

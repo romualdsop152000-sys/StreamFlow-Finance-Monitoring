@@ -25,6 +25,7 @@ logs/**/*
 .vscode/
 
 # sensitive information
+.env
 .envProject/
 __pycache__/
 *.pyc
