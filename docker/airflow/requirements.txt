@@ -4,3 +4,5 @@ requests>=2.31.0
 python-binance>=1.0.19
 pyspark==3.5.0
 pyarrow>=14.0.0
+dbt-core==1.11.6
+dbt-postgres==1.10.0

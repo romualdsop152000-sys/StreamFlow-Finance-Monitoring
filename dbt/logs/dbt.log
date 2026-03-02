@@ -1,12 +1,12 @@
-[0m21:14:08.147731 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x78d83a2c7980>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x78d83a01b320>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x78d8382c44d0>]}
+[0m20:14:54.653834 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f13b761abd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f13b4f18b60>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f13b4fe0aa0>]}
 
 
-============================== 21:14:08.152289 | d0c5267d-7b35-47b8-8075-5339ecbc5cee ==============================
-[0m21:14:08.152289 [info ] [MainThread]: Running with dbt=1.11.6
-[0m21:14:08.152739 [debug] [MainThread]: running dbt with arguments {'indirect_selection': 'eager', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'warn_error': 'None', 'static_parser': 'True', 'log_format': 'default', 'log_path': 'logs', 'introspect': 'True', 'quiet': 'False', 'empty': 'None', 'use_colors': 'True', 'write_json': 'True', 'debug': 'False', 'log_cache_events': 'False', 'profiles_dir': '/home/djnaguro/.dbt', 'version_check': 'True', 'printer_width': '80', 'no_print': 'None', 'use_experimental_parser': 'False', 'cache_selected_only': 'False', 'target_path': 'None', 'fail_fast': 'False', 'invocation_command': 'dbt init', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])'}
-[0m21:17:18.921340 [debug] [MainThread]: Starter project path: /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/streamflow-venv/lib/python3.12/site-packages/dbt/include/starter_project
-[0m21:17:18.924279 [info ] [MainThread]: 
-Your new dbt project "finance" was created!
+============================== 20:14:54.658967 | 45d51d7d-c011-4fd9-ac1d-ab612479e6ee ==============================
+[0m20:14:54.658967 [info ] [MainThread]: Running with dbt=1.11.6
+[0m20:14:54.659490 [debug] [MainThread]: running dbt with arguments {'introspect': 'True', 'debug': 'False', 'printer_width': '80', 'use_experimental_parser': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'warn_error': 'None', 'no_print': 'None', 'write_json': 'True', 'use_colors': 'True', 'log_path': 'logs', 'target_path': 'None', 'partial_parse': 'True', 'log_cache_events': 'False', 'version_check': 'True', 'send_anonymous_usage_stats': 'True', 'empty': 'None', 'indirect_selection': 'eager', 'profiles_dir': '/home/djnaguro/.dbt', 'cache_selected_only': 'False', 'fail_fast': 'False', 'log_format': 'default', 'invocation_command': 'dbt init', 'quiet': 'False', 'static_parser': 'True'}
+[0m20:19:48.150350 [debug] [MainThread]: Starter project path: /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/streamflow-venv/lib/python3.12/site-packages/dbt/include/starter_project
+[0m20:19:48.156181 [info ] [MainThread]: 
+Your new dbt project "btc_nasdaq" was created!
 
 For more information on how to configure the profiles.yml file,
 please consult the dbt documentation here:
@@ -21,10 +21,52 @@ Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
 
 Happy modeling!
 
-[0m21:17:18.924955 [info ] [MainThread]: Setting up your profile.
-[0m21:26:56.191262 [info ] [MainThread]: Profile finance written to /home/djnaguro/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
-[0m21:26:56.192945 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 768.08777, "process_in_blocks": "0", "process_kernel_time": 0.086095, "process_mem_max_rss": "105036", "process_out_blocks": "96", "process_user_time": 1.044681}
-[0m21:26:56.193766 [debug] [MainThread]: Command `dbt init` succeeded at 21:26:56.193610 after 768.09 seconds
-[0m21:26:56.194303 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x78d837c093d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x78d8371de750>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x78d8379933e0>]}
-[0m21:26:56.194857 [debug] [MainThread]: Flushing usage events
-[0m21:26:56.725686 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m20:19:48.157046 [info ] [MainThread]: Setting up your profile.
+[0m20:57:27.307273 [info ] [MainThread]: Profile btc_nasdaq written to /home/djnaguro/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m20:57:27.308209 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 2552.6978, "process_in_blocks": "57856", "process_kernel_time": 0.109128, "process_mem_max_rss": "104744", "process_out_blocks": "88", "process_user_time": 1.216149}
+[0m20:57:27.308665 [debug] [MainThread]: Command `dbt init` succeeded at 20:57:27.308580 after 2552.70 seconds
+[0m20:57:27.308984 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f13b575b3b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f13b4a5b050>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f13b49e16d0>]}
+[0m20:57:27.309488 [debug] [MainThread]: Flushing usage events
+[0m20:57:27.742157 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m21:00:41.518088 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x790321a8f4a0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7903228dce60>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7903219909e0>]}
+
+
+============================== 21:00:41.521627 | 02b53e3a-6006-4dbf-85d0-e2b4f7b12175 ==============================
+[0m21:00:41.521627 [info ] [MainThread]: Running with dbt=1.11.6
+[0m21:00:41.522103 [debug] [MainThread]: running dbt with arguments {'partial_parse': 'True', 'log_format': 'default', 'static_parser': 'True', 'quiet': 'False', 'printer_width': '80', 'empty': 'None', 'send_anonymous_usage_stats': 'True', 'use_experimental_parser': 'False', 'use_colors': 'True', 'invocation_command': 'dbt debug', 'log_cache_events': 'False', 'target_path': 'None', 'debug': 'False', 'profiles_dir': '/home/djnaguro/.dbt', 'introspect': 'True', 'warn_error': 'None', 'log_path': 'logs', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'no_print': 'None', 'version_check': 'True', 'indirect_selection': 'eager', 'write_json': 'True', 'fail_fast': 'False', 'cache_selected_only': 'False'}
+[0m21:00:41.530172 [info ] [MainThread]: dbt version: 1.11.6
+[0m21:00:41.530609 [info ] [MainThread]: python version: 3.12.3
+[0m21:00:41.530893 [info ] [MainThread]: python path: /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/streamflow-venv/bin/python
+[0m21:00:41.531135 [info ] [MainThread]: os info: Linux-6.17.0-14-generic-x86_64-with-glibc2.39
+[0m21:00:41.569357 [info ] [MainThread]: Using profiles dir at /home/djnaguro/.dbt
+[0m21:00:41.569795 [info ] [MainThread]: Using profiles.yml file at /home/djnaguro/.dbt/profiles.yml
+[0m21:00:41.570058 [info ] [MainThread]: Using dbt_project.yml file at /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/dbt_project.yml
+[0m21:00:41.570366 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m21:00:41.571120 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.09719844, "process_in_blocks": "56", "process_kernel_time": 0.07605, "process_mem_max_rss": "105208", "process_out_blocks": "16", "process_user_time": 1.011668}
+[0m21:00:41.571584 [debug] [MainThread]: Command `dbt debug` failed at 21:00:41.571493 after 0.10 seconds
+[0m21:00:41.571921 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x790321a8f4a0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x790320ef81a0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x790320a03ec0>]}
+[0m21:00:41.572282 [debug] [MainThread]: Flushing usage events
+[0m21:00:41.989655 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m21:55:17.713010 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x775da7a77e30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x775da98236b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x775da6c6c8f0>]}
+
+
+============================== 21:55:17.715285 | fec59776-2122-42b6-a277-d0d46fda0dc5 ==============================
+[0m21:55:17.715285 [info ] [MainThread]: Running with dbt=1.11.6
+[0m21:55:17.715683 [debug] [MainThread]: running dbt with arguments {'debug': 'False', 'log_format': 'default', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'log_path': 'logs', 'static_parser': 'True', 'target_path': 'None', 'quiet': 'False', 'fail_fast': 'False', 'indirect_selection': 'eager', 'invocation_command': 'dbt debug', 'cache_selected_only': 'False', 'warn_error': 'None', 'log_cache_events': 'False', 'no_print': 'None', 'profiles_dir': '/home/djnaguro/.dbt', 'introspect': 'True', 'send_anonymous_usage_stats': 'True', 'version_check': 'True', 'use_colors': 'True', 'empty': 'None', 'printer_width': '80', 'use_experimental_parser': 'False', 'write_json': 'True', 'partial_parse': 'True'}
+[0m21:55:17.721400 [info ] [MainThread]: dbt version: 1.11.6
+[0m21:55:17.721719 [info ] [MainThread]: python version: 3.12.3
+[0m21:55:17.721952 [info ] [MainThread]: python path: /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/streamflow-venv/bin/python
+[0m21:55:17.722175 [info ] [MainThread]: os info: Linux-6.17.0-14-generic-x86_64-with-glibc2.39
+[0m21:55:17.756489 [info ] [MainThread]: Using profiles dir at /home/djnaguro/.dbt
+[0m21:55:17.756915 [info ] [MainThread]: Using profiles.yml file at /home/djnaguro/.dbt/profiles.yml
+[0m21:55:17.757150 [info ] [MainThread]: Using dbt_project.yml file at /home/djnaguro/Documents/Master Spécialisé en IA/Cours/DATA 705 - Bases de données non relationnelles/StreamFlow-Finance/dbt/dbt_project.yml
+[0m21:55:17.757423 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m21:55:17.758109 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.08657851, "process_in_blocks": "0", "process_kernel_time": 0.081916, "process_mem_max_rss": "105216", "process_out_blocks": "16", "process_user_time": 1.060913}
+[0m21:55:17.758523 [debug] [MainThread]: Command `dbt debug` failed at 21:55:17.758445 after 0.09 seconds
+[0m21:55:17.758807 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x775da72908f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x775da6ad6a80>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x775da6cfe270>]}
+[0m21:55:17.759104 [debug] [MainThread]: Flushing usage events
+[0m21:55:18.199510 [debug] [MainThread]: An error was encountered while trying to flush usage events

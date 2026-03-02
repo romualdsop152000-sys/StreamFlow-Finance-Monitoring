@@ -13,7 +13,7 @@ def parse_args():
 def get_postgres_config():
     """Configuration PostgreSQL depuis variables d'environnement."""
     return {
-        "host": os.getenv("POSTGRES_HOST", "postgres"),
+        "host": os.getenv("POSTGRES_HOST", "datalake-warehouse"),
         "port": os.getenv("POSTGRES_PORT", "5432"),
         "database": os.getenv("POSTGRES_DB", "datalake"),
         "user": os.getenv("POSTGRES_USER", "datalake_user"),
@@ -94,7 +94,7 @@ def main(execution_date: str):
     except Exception as e:
         print(f"[ERROR] Failed to export to PostgreSQL: {e}")
         
-        # Fallback: sauvegarder en CSV local
+        # Fallback: sauvegarder en CSV local 
         fallback_path = f"data/export/postgres_fallback/dt={execution_date}"
         os.makedirs(fallback_path, exist_ok=True)
         

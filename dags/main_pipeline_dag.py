@@ -4,6 +4,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.bash import BashOperator
+from src.postgres.load import load_data_in_postgres
 
 
 # -------------------------
@@ -12,7 +13,8 @@ from airflow.operators.bash import BashOperator
 PROJECT_ROOT = "/opt/airflow" 
 PYTHON = "python3"
 SPARK_SUBMIT = "spark-submit"
-DBT_DIR = f"{PROJECT_ROOT}/dbt/btc_leadlag_dbt"
+DBT_DIR = f"{PROJECT_ROOT}/dbt/btc_nasdaq"
+BTC_NASDAQ_USAGE_DATA_PATH = "data/usage/finance/lead_lag_analysis/"
 
 # Config Spark pour éviter les problèmes de chmod sur Windows/WSL
 SPARK_CONF = (
@@ -108,20 +110,25 @@ with DAG(
     )
 
     # ========== 4) EXPORT vers PostgreSQL ==========
-    t_export_pg = BashOperator(
-        task_id="spark_export_to_postgres",
-        bash_command=(
-            f"cd {PROJECT_ROOT} && "
-            f"{SPARK_SUBMIT} {SPARK_CONF} src/spark_jobs/export/load_to_warehouse.py "
-            f"--execution_date '{{{{ ds }}}}'"
-        ),
+    # t_export_pg = BashOperator(
+    #     task_id="spark_export_to_postgres",
+    #     bash_command=(
+    #         f"cd {PROJECT_ROOT} && "
+    #         f"{SPARK_SUBMIT} {SPARK_CONF} src/spark_jobs/export/load_to_warehouse.py "
+    #         f"--execution_date '{{{{ ds }}}}'"
+    #     ),
+    # )
+    t_export_pg = PythonOperator(
+    task_id="load_data_into_postgres",
+    python_callable=load_data_in_postgres,
+    op_args=[BTC_NASDAQ_USAGE_DATA_PATH, "btc_nasdaq"],
     )
 
     # ========== 5) dbt : build marts + tests qualité ==========
-    # t_dbt_run = BashOperator(
-    #     task_id="dbt_run",
-    #     bash_command=f"cd {DBT_DIR} && dbt run --profiles-dir .",
-    # )
+    t_dbt_run = BashOperator(
+        task_id="dbt_run",
+        bash_command=f"cd {DBT_DIR} && dbt run --profiles-dir .",
+    )
 
     # t_dbt_test = BashOperator(
     #     task_id="dbt_test",
@@ -153,5 +160,5 @@ with DAG(
     [t_format_binance, t_format_yahoo] >> t_combine
     
     # Suite séquentielle
-    # t_combine >> t_export_pg >> t_dbt_run >> t_dbt_test >> t_index_elastic >> end
     t_combine >> t_export_pg >> t_index_elastic >> end
+    # t_combine >> t_export_pg >> t_dbt_run >> t_index_elastic >> end
