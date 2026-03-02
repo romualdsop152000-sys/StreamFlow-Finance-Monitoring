@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: datalake
+    schema: public
+    tables:
+      - name: btc_nasdaq

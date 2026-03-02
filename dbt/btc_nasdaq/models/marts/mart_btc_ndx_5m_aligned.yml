@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: mart_btc_ndx_5m_aligned
+    description: "Dataset aligné BTC/NDX 5m (ndx_close non-null), prêt pour analytics/ML."
+    columns:
+      - name: ts_minute_utc
+        tests:
+          - not_null
+      - name: dt
+        tests:
+          - not_null
+      - name: btc_close
+        tests:
+          - not_null
+      - name: ndaq_close
+        tests:
+          - not_null

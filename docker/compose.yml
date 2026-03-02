@@ -141,7 +141,7 @@ services:
       - airflow_logs:/opt/airflow/logs
     command: airflow scheduler
     restart: unless-stopped
-
+ 
 volumes:
   postgres_db:
   postgres_warehouse:
