@@ -180,11 +180,11 @@ docker compose down -v
 
 | Service | URL | Identifiants |
 |---|---|---|
-| **Airflow UI** | http://localhost:8082 | admin / admin |
+| **Airflow UI** | http://localhost:8082 |--------------- |
 | **Kibana** | http://localhost:5601 | — |
-| **pgAdmin** | http://localhost:5050 | admin@admin.com / admin |
+| **pgAdmin** | http://localhost:5050 | ------------------- |
 | **Elasticsearch** | http://localhost:9200 | — |
-| **PostgreSQL DWH** | localhost:5433 | datalake_user / datalake_pass |
+| **PostgreSQL DWH** | localhost:5433 | ----------------- |
 
 ### Vérification rapide des services
 
