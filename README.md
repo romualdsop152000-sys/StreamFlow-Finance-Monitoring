@@ -106,16 +106,33 @@ git clone <url-du-repo>
 cd StreamFlow-Finance
 ```
 
-### 2. Construire et démarrer tous les services
+### 2. Configurer les variables d'environnement
 
 ```bash
 cd docker
+cp .env.example .env
+```
+
+Éditer `.env` avec les valeurs souhaitées (les valeurs par défaut fonctionnent en local) :
+
+```ini
+# Exemple de valeurs à personnaliser en production
+POSTGRES_PASSWORD=mon_mot_de_passe_secret
+AIRFLOW_ADMIN_PASSWORD=mon_mdp_airflow
+PGADMIN_DEFAULT_PASSWORD=mon_mdp_pgadmin
+```
+
+> `.env` est dans `.gitignore` — il ne sera jamais commité. Ne jamais mettre de secrets dans le code.
+
+### 3. Construire et démarrer tous les services
+
+```bash
 docker compose up --build -d
 ```
 
 > Le premier build télécharge Spark 3.5.0 et Java 17 (~500 Mo). Compter 5-10 min.
 
-### 3. Vérifier que tous les services sont actifs
+### 4. Vérifier que tous les services sont actifs
 
 ```bash
 docker compose ps
@@ -134,7 +151,7 @@ kibana               Up (healthy)
 pgadmin              Up
 ```
 
-### 4. Activer et déclencher le pipeline
+### 5. Activer et déclencher le pipeline
 
 ```bash
 # Activer le DAG
@@ -147,7 +164,7 @@ docker exec airflow-webserver airflow dags trigger bigdata_btc_ndx_pipeline
 docker exec airflow-webserver airflow dags list-runs -d bigdata_btc_ndx_pipeline
 ```
 
-### 5. Arrêter le projet
+### 6. Arrêter le projet
 
 ```bash
 # Arrêter sans perdre les données
@@ -201,6 +218,8 @@ StreamFlow-Finance/
 │   └── dbt_project.yml
 ├── docker/
 │   ├── compose.yml                   # Orchestration Docker
+│   ├── .env.example                  # Template de configuration (à copier en .env)
+│   ├── .env                          # Secrets locaux (gitignored, ne pas commiter)
 │   ├── airflow/Dockerfile            # Image Airflow + Spark + Java
 │   ├── airflow/requirements.txt      # Dépendances Airflow
 │   └── init-warehouse.sql            # Schéma PostgreSQL initial
@@ -231,15 +250,22 @@ StreamFlow-Finance/
 
 ## Variables d'environnement
 
-Toutes les variables sont configurées dans `docker/compose.yml` :
+Toutes les variables sont centralisées dans `docker/.env` (copié depuis `docker/.env.example`).
+**Aucun secret n'est codé en dur dans le code source.**
 
 | Variable | Valeur par défaut | Description |
 |---|---|---|
 | `POSTGRES_HOST` | `postgres-warehouse` | Hôte PostgreSQL DWH |
 | `POSTGRES_PORT` | `5432` | Port PostgreSQL (interne Docker) |
 | `POSTGRES_DB` | `datalake` | Nom de la base |
-| `POSTGRES_USER` | `datalake_user` | Utilisateur |
-| `POSTGRES_PASSWORD` | `datalake_pass` | Mot de passe |
+| `POSTGRES_USER` | `datalake_user` | Utilisateur DWH |
+| `POSTGRES_PASSWORD` | — | Mot de passe DWH (à définir dans `.env`) |
+| `AIRFLOW_POSTGRES_USER` | `airflow` | Utilisateur PostgreSQL Airflow |
+| `AIRFLOW_POSTGRES_PASSWORD` | — | Mot de passe PostgreSQL Airflow |
+| `AIRFLOW_ADMIN_USER` | `admin` | Login Airflow UI |
+| `AIRFLOW_ADMIN_PASSWORD` | — | Mot de passe Airflow UI |
+| `PGADMIN_DEFAULT_EMAIL` | — | Email pgAdmin |
+| `PGADMIN_DEFAULT_PASSWORD` | — | Mot de passe pgAdmin |
 | `ELASTICSEARCH_HOST` | `elasticsearch` | Hôte Elasticsearch |
 | `ELASTICSEARCH_PORT` | `9200` | Port Elasticsearch |
 
@@ -260,6 +286,9 @@ pytest
 # Lancer les tests avec couverture
 pytest --cov=src --cov-report=html
 ```
+
+> Pour les scripts Python en local, copier `docker/.env` à la racine du projet ou exporter
+> les variables manuellement : `export POSTGRES_PASSWORD=...`
 
 ---
 
