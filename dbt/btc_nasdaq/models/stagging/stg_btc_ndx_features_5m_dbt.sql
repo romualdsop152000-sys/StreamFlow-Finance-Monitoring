@@ -1,7 +1,7 @@
 with source as (
 
     select *
-    from {{ source('datalake', 'btc_nasdaq') }}
+    from {{ source('datalake', 'lead_lag_features') }}
 
 ),
 
@@ -9,7 +9,7 @@ final as (
 
     select
         cast(ts_minute_utc as timestamp) as ts_minute_utc,
-        cast(dt as date) as dt,
+        cast(execution_date as date) as dt,
 
         -- BTC
         -- cast(btc_open as double precision) as btc_open,

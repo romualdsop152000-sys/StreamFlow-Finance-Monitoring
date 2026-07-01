@@ -109,15 +109,6 @@ with DAG(
         ),
     )
 
-    # ========== 4) EXPORT vers PostgreSQL ==========
-    # t_export_pg = BashOperator(
-    #     task_id="spark_export_to_postgres",
-    #     bash_command=(
-    #         f"cd {PROJECT_ROOT} && "
-    #         f"{SPARK_SUBMIT} {SPARK_CONF} src/spark_jobs/export/load_to_warehouse.py "
-    #         f"--execution_date '{{{{ ds }}}}'"
-    #     ),
-    # )
     t_export_pg = PythonOperator(
     task_id="load_data_into_postgres",
     python_callable=load_data_in_postgres,
@@ -129,11 +120,6 @@ with DAG(
         task_id="dbt_run",
         bash_command=f"cd {DBT_DIR} && dbt run --profiles-dir .",
     )
-
-    # t_dbt_test = BashOperator(
-    #     task_id="dbt_test",
-    #     bash_command=f"cd {DBT_DIR} && dbt test --profiles-dir .",
-    # )
 
     # ========== 6) Indexing Elasticsearch ==========
     t_index_elastic = BashOperator(

@@ -4,4 +4,4 @@ sources:
   - name: datalake
     schema: public
     tables:
-      - name: btc_nasdaq
+      - name: lead_lag_features

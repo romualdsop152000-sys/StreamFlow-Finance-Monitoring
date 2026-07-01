@@ -1,3 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "streamflow-finance"
+version = "1.0.0"
+description = "Data lake pipeline pour l'analyse financière BTC/NASDAQ"
+requires-python = ">=3.10"
+dependencies = [
+    # Data processing
+    "pandas==3.0.0",
+    "numpy==2.4.2",
+    "pyarrow==23.0.1",
+    # APIs financières
+    "yfinance==1.1.0",
+    "requests==2.32.5",
+    "curl_cffi==0.13.0",
+    # Big Data
+    "pyspark==3.5.0",
+    # dbt
+    "dbt-core==1.11.6",
+    "dbt-postgres==1.10.0",
+    "dbt-duckdb==1.10.1",
+    # Bases de données
+    "psycopg2-binary==2.9.11",
+    "SQLAlchemy==2.0.47",
+    # Elasticsearch
+    "elasticsearch==9.3.0",
+    # Utilitaires
+    "python-dotenv==1.2.1",
+    "PyYAML==6.0.3",
+    "Jinja2==3.1.6",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "requests-mock>=1.11.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

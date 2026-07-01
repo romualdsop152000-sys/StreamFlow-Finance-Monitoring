@@ -1,0 +1,800 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>StreamFlow Finance - Guide Technique</title><style>@page { margin: 2cm; size: A4; }@media print { pre { page-break-inside: avoid; } h2 { page-break-after: avoid; } }* { box-sizing: border-box; }body { font-family: Arial,sans-serif; font-size: 12px; line-height: 1.7; color: #222;       max-width: 900px; margin: 0 auto; padding: 20px; }h1 { color: #1a1a2e; border-bottom: 3px solid #e25a1c; padding-bottom: 8px; font-size: 22px; }h2 { color: #e25a1c; border-bottom: 1px solid #ddd; padding-bottom: 4px;     font-size: 16px; margin-top: 30px; }h3 { color: #333; font-size: 13px; margin-top: 16px; }pre { background: #1e1e1e; color: #d4d4d4; padding: 14px; border-radius: 6px;      font-size: 10px; font-family: Consolas,monospace; white-space: pre-wrap;      word-wrap: break-word; line-height: 1.5; }code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px;       font-size: 10px; font-family: Consolas,monospace; }pre code { background: none; padding: 0; color: #d4d4d4; }table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 11px; }th { background: #e25a1c; color: white; padding: 8px 10px; text-align: left; }td { border: 1px solid #ddd; padding: 6px 10px; }tr:nth-child(even) td { background: #f9f9f9; }hr { border: none; border-top: 2px solid #e25a1c; margin: 20px 0; }blockquote { border-left: 4px solid #e25a1c; padding: 4px 14px;             color: #555; background: #fff8f5; margin: 8px 0; }a { color: #017CEE; }</style></head><body><h1 id="guide-technique-streamflow-finance">Guide Technique — StreamFlow Finance</h1>
+<h2 id="stack-de-lingestion-a-la-visualisation">Stack de l'ingestion à la visualisation</h2>
+<hr />
+<h2 id="vue-densemble-du-flux-de-donnees">Vue d'ensemble du flux de données</h2>
+<pre><code>[Binance API]  ──►  [Raw JSON]  ──►  [Spark Format]  ──┐
+                                                         ├──►  [Spark Join + Features]
+[Yahoo Finance] ──►  [Raw CSV]  ──►  [Spark Format]  ──┘
+                                            │
+                    ┌───────────────────────┴───────────────────────┐
+                    ▼                                               ▼
+             [PostgreSQL]  ──►  [dbt]                     [Elasticsearch]
+                                                                    │
+                                                               [Kibana]
+</code></pre>
+<p>Chaque couche est orchestrée par <strong>Apache Airflow</strong> toutes les 5 minutes.</p>
+<hr />
+<hr />
+<h2 id="stack-1-ingestion-des-donnees-de-marche">Stack 1 — Ingestion des données de marché</h2>
+<h3 id="role">Rôle</h3>
+<p>Collecter les données OHLCV (Open, High, Low, Close, Volume) en temps réel depuis
+deux sources : l'API Binance pour le Bitcoin et Yahoo Finance pour le NASDAQ-100.</p>
+<h3 id="technologie">Technologie</h3>
+<ul>
+<li><strong>Binance REST API</strong> : endpoint <code>/api/v3/klines</code>, intervalle 1 minute</li>
+<li><strong>yfinance</strong> : bibliothèque Python wrappant l'API Yahoo Finance</li>
+</ul>
+<h3 id="fichiers-concernes">Fichiers concernés</h3>
+<ul>
+<li><code>src/ingestion/binance_btc_usdt.py</code></li>
+<li><code>src/ingestion/yahoo_finance.py</code></li>
+</ul>
+<hr />
+<h3 id="code-ingestion-binance-btcusdt">Code — Ingestion Binance (BTC/USDT)</h3>
+<pre><code class="language-python"># src/ingestion/binance_btc_usdt.py
+
+import requests
+from datetime import datetime, timezone
+
+BINANCE_URL = &quot;https://api.binance.com/api/v3/klines&quot;
+
+def fetch_klines_1m(symbol: str = &quot;BTCUSDT&quot;, limit: int = 10) -&gt; list:
+    &quot;&quot;&quot;
+    Appel à l'API Binance pour récupérer les klines (bougies) 1 minute.
+    Retourne une liste de tableaux [open_time, open, high, low, close, volume, ...]
+    &quot;&quot;&quot;
+    params = {
+        &quot;symbol&quot;: symbol,
+        &quot;interval&quot;: &quot;1m&quot;,
+        &quot;limit&quot;: limit
+    }
+    response = requests.get(BINANCE_URL, params=params, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+def normalize_klines(raw: list, symbol: str = &quot;BTCUSDT&quot;) -&gt; list[dict]:
+    &quot;&quot;&quot;
+    Transforme les tableaux Binance bruts en dictionnaires typés.
+    Ajoute les métadonnées : symbol, interval, ingestion_timestamp.
+    &quot;&quot;&quot;
+    records = []
+    for k in raw:
+        records.append({
+            &quot;open_time_ms&quot;:  k[0],
+            &quot;open&quot;:          float(k[1]),
+            &quot;high&quot;:          float(k[2]),
+            &quot;low&quot;:           float(k[3]),
+            &quot;close&quot;:         float(k[4]),
+            &quot;volume&quot;:        float(k[5]),
+            &quot;close_time_ms&quot;: k[6],
+            &quot;quote_asset_volume&quot;: float(k[7]),
+            &quot;number_of_trades&quot;:   int(k[8]),
+            &quot;symbol&quot;:        symbol,
+            &quot;interval&quot;:      &quot;1m&quot;,
+            &quot;ingested_at&quot;:   datetime.now(timezone.utc).isoformat()
+        })
+    return records
+
+def write_raw(records: list, execution_date: str) -&gt; str:
+    &quot;&quot;&quot;
+    Persiste les données brutes en JSON partitionné par date.
+    Chemin : data/raw/finance/crypto/binance/btc_usdt/dt=YYYY-MM-DD/
+    Idempotent : ajoute aux fichiers existants sans doublon.
+    &quot;&quot;&quot;
+    import json, os
+    from pathlib import Path
+
+    out_dir = Path(f&quot;data/raw/finance/crypto/binance/btc_usdt/dt={execution_date}&quot;)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_file = out_dir / &quot;data.json&quot;
+
+    with open(out_file, &quot;a&quot;) as f:
+        for record in records:
+            f.write(json.dumps(record) + &quot;\n&quot;)
+
+    return str(out_file)
+</code></pre>
+<hr />
+<h3 id="code-ingestion-yahoo-finance-nasdaq-100">Code — Ingestion Yahoo Finance (NASDAQ-100)</h3>
+<pre><code class="language-python"># src/ingestion/yahoo_finance.py
+
+import yfinance as yf
+import pandas as pd
+from pathlib import Path
+
+def fetch_ohlcv(
+    ticker: str = &quot;^NDX&quot;,
+    period: str = &quot;1d&quot;,
+    interval: str = &quot;1m&quot;
+) -&gt; pd.DataFrame:
+    &quot;&quot;&quot;
+    Télécharge les données OHLCV du NASDAQ-100 via yfinance.
+    Disponible uniquement pendant les heures de marché (14h30–21h00 UTC).
+    &quot;&quot;&quot;
+    data = yf.download(
+        tickers=ticker,
+        period=period,
+        interval=interval,
+        progress=False,
+        auto_adjust=True
+    )
+    data.reset_index(inplace=True)
+    data[&quot;symbol&quot;] = ticker
+    data[&quot;interval&quot;] = interval
+    return data
+
+def save_raw_data_locally(df: pd.DataFrame, execution_date: str) -&gt; str:
+    &quot;&quot;&quot;
+    Sauvegarde avec déduplication : fusionne avec les données existantes
+    si le fichier est déjà présent pour la date du jour.
+    &quot;&quot;&quot;
+    out_dir = Path(f&quot;data/raw/market/yfinance/nasdaq_100/dt={execution_date}&quot;)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_file = out_dir / &quot;data.csv&quot;
+
+    if out_file.exists():
+        existing = pd.read_csv(out_file)
+        df = pd.concat([existing, df]).drop_duplicates(
+            subset=[&quot;Datetime&quot;], keep=&quot;last&quot;
+        ).sort_values(&quot;Datetime&quot;)
+
+    df.to_csv(out_file, index=False)
+    return str(out_file)
+</code></pre>
+<hr />
+<h3 id="donnees-produites">Données produites</h3>
+<pre><code>data/raw/
+├── finance/crypto/binance/btc_usdt/dt=2026-06-30/data.json   ← lignes NDJSON
+└── market/yfinance/nasdaq_100/dt=2026-06-30/data.csv         ← CSV OHLCV
+</code></pre>
+<h2 id="-">---</h2>
+<h2 id="stack-2-formatting-avec-apache-spark">Stack 2 — Formatting avec Apache Spark</h2>
+<h3 id="role_1">Rôle</h3>
+<p>Nettoyer, typer et enrichir les données brutes pour les rendre exploitables
+dans les étapes suivantes. Chaque source est traitée indépendamment en parallèle.</p>
+<h3 id="technologie_1">Technologie</h3>
+<ul>
+<li><strong>Apache Spark 3.5.0</strong> (PySpark) — traitement distribué</li>
+<li><strong>Parquet</strong> — format de sortie colonnaire, optimisé pour les requêtes analytiques</li>
+</ul>
+<h3 id="fichiers-concernes_1">Fichiers concernés</h3>
+<ul>
+<li><code>src/spark_jobs/formatting/format_binance_spark.py</code></li>
+<li><code>src/spark_jobs/formatting/format_yahoo_finance_spark.py</code></li>
+</ul>
+<hr />
+<h3 id="code-formatting-btc-binance-parquet">Code — Formatting BTC (Binance → Parquet)</h3>
+<pre><code class="language-python"># src/spark_jobs/formatting/format_binance_spark.py
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.types import DoubleType, TimestampType
+
+def format_binance(execution_date: str):
+    spark = SparkSession.builder.appName(&quot;format_binance&quot;).getOrCreate()
+
+    raw_path = f&quot;data/raw/finance/crypto/binance/btc_usdt/dt={execution_date}&quot;
+    out_path = f&quot;data/formatted/finance/crypto/binance/btc_usdt/dt={execution_date}&quot;
+
+    # Lecture des fichiers JSON bruts (NDJSON multi-lignes)
+    df = spark.read.json(raw_path)
+
+    # Conversion du timestamp milliseconde → datetime UTC
+    df = df.withColumn(
+        &quot;ts_minute_utc&quot;,
+        F.to_timestamp(F.from_unixtime(F.col(&quot;open_time_ms&quot;) / 1000))
+    )
+
+    # Cast des colonnes numériques
+    for col_name in [&quot;open&quot;, &quot;high&quot;, &quot;low&quot;, &quot;close&quot;, &quot;volume&quot;]:
+        df = df.withColumn(col_name, F.col(col_name).cast(DoubleType()))
+
+    # Features calculées
+    df = df \
+        .withColumn(&quot;price_range&quot;,      F.col(&quot;high&quot;) - F.col(&quot;low&quot;)) \
+        .withColumn(&quot;price_change&quot;,     F.col(&quot;close&quot;) - F.col(&quot;open&quot;)) \
+        .withColumn(&quot;price_change_pct&quot;,
+                    (F.col(&quot;close&quot;) - F.col(&quot;open&quot;)) / F.col(&quot;open&quot;) * 100) \
+        .withColumn(&quot;is_bullish&quot;,       F.col(&quot;close&quot;) &gt; F.col(&quot;open&quot;))
+
+    # Déduplication et tri
+    df = df.dropDuplicates([&quot;ts_minute_utc&quot;]).orderBy(&quot;ts_minute_utc&quot;)
+
+    # Sauvegarde en Parquet
+    df.write.mode(&quot;overwrite&quot;).parquet(out_path)
+    spark.stop()
+</code></pre>
+<hr />
+<h3 id="code-formatting-nasdaq-yahoo-finance-parquet">Code — Formatting NASDAQ (Yahoo Finance → Parquet)</h3>
+<pre><code class="language-python"># src/spark_jobs/formatting/format_yahoo_finance_spark.py
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+def format_yahoo(execution_date: str):
+    spark = SparkSession.builder.appName(&quot;format_yahoo&quot;).getOrCreate()
+
+    raw_path = f&quot;data/raw/market/yfinance/nasdaq_100/dt={execution_date}&quot;
+    out_path = f&quot;data/formatted/market/yfinance/nasdaq_100/dt={execution_date}&quot;
+
+    df = spark.read.option(&quot;header&quot;, True).csv(raw_path)
+
+    # Normalisation du timestamp (Yahoo renvoie des formats variables)
+    df = df.withColumn(
+        &quot;ts_minute_utc&quot;,
+        F.to_timestamp(F.col(&quot;Datetime&quot;))
+    )
+
+    # Renommage et typage
+    df = df \
+        .withColumnRenamed(&quot;Open&quot;,   &quot;open&quot;) \
+        .withColumnRenamed(&quot;High&quot;,   &quot;high&quot;) \
+        .withColumnRenamed(&quot;Low&quot;,    &quot;low&quot;) \
+        .withColumnRenamed(&quot;Close&quot;,  &quot;close&quot;) \
+        .withColumnRenamed(&quot;Volume&quot;, &quot;volume&quot;)
+
+    for col_name in [&quot;open&quot;, &quot;high&quot;, &quot;low&quot;, &quot;close&quot;, &quot;volume&quot;]:
+        df = df.withColumn(col_name, F.col(col_name).cast(&quot;double&quot;))
+
+    # Mêmes features calculées que pour BTC
+    df = df \
+        .withColumn(&quot;price_change_pct&quot;,
+                    (F.col(&quot;close&quot;) - F.col(&quot;open&quot;)) / F.col(&quot;open&quot;) * 100) \
+        .withColumn(&quot;is_bullish&quot;, F.col(&quot;close&quot;) &gt; F.col(&quot;open&quot;))
+
+    df = df.dropDuplicates([&quot;ts_minute_utc&quot;]).orderBy(&quot;ts_minute_utc&quot;)
+    df.write.mode(&quot;overwrite&quot;).parquet(out_path)
+    spark.stop()
+</code></pre>
+<hr />
+<h3 id="donnees-produites_1">Données produites</h3>
+<pre><code>data/formatted/
+├── finance/crypto/binance/btc_usdt/dt=2026-06-30/*.parquet
+└── market/yfinance/nasdaq_100/dt=2026-06-30/*.parquet
+</code></pre>
+<h2 id="-_1">---</h2>
+<h2 id="stack-3-feature-engineering-lead-lag">Stack 3 — Feature Engineering (Lead / Lag)</h2>
+<h3 id="role_2">Rôle</h3>
+<p>Joindre les données BTC et NASDAQ sur le timestamp commun, puis générer
+les features temporelles (lag/lead sur 1 à 5 minutes) et les rendements.
+Ces features sont le cœur de l'analyse de corrélation.</p>
+<h3 id="technologie_2">Technologie</h3>
+<ul>
+<li><strong>PySpark Window Functions</strong> : <code>lag()</code>, <code>lead()</code> sur une fenêtre ordonnée par <code>ts_minute_utc</code></li>
+<li><strong>Left Join</strong> : préserve tous les instants BTC (24/7), NASDAQ NULL hors heures de marché</li>
+</ul>
+<h3 id="fichier-concerne">Fichier concerné</h3>
+<ul>
+<li><code>src/spark_jobs/combination/features_lead_lag_spark.py</code></li>
+</ul>
+<hr />
+<h3 id="code-join-et-generation-des-features">Code — Join et génération des features</h3>
+<pre><code class="language-python"># src/spark_jobs/combination/features_lead_lag_spark.py
+
+from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+# ── Join BTC ◄► NASDAQ sur ts_minute_utc ──────────────────────────────────
+# LEFT JOIN : tous les points BTC sont conservés.
+# Quand le NASDAQ est fermé → ndaq_close = NULL pour ces instants.
+joined = btc_renamed.join(ndaq_renamed, on=&quot;ts_minute_utc&quot;, how=&quot;left&quot;)
+
+# ── Fenêtre temporelle (ordre chronologique global) ─────────────────────────
+window_spec = Window.orderBy(&quot;ts_minute_utc&quot;)
+
+# ── Génération des features lag et lead (1 → 5 minutes) ─────────────────────
+for lag in range(1, max_lag_minutes + 1):
+    # BTC : lag (passé) et lead (futur)
+    joined = joined.withColumn(
+        f&quot;btc_close_lag_{lag}&quot;,
+        F.lag(&quot;btc_close&quot;, lag).over(window_spec)
+    )
+    joined = joined.withColumn(
+        f&quot;btc_close_lead_{lag}&quot;,
+        F.lead(&quot;btc_close&quot;, lag).over(window_spec)
+    )
+    joined = joined.withColumn(
+        f&quot;btc_volume_lag_{lag}&quot;,
+        F.lag(&quot;btc_volume&quot;, lag).over(window_spec)
+    )
+    # NASDAQ : même logique (NULL si marché fermé)
+    joined = joined.withColumn(
+        f&quot;ndaq_close_lag_{lag}&quot;,
+        F.lag(&quot;ndaq_close&quot;, lag).over(window_spec)
+    )
+    joined = joined.withColumn(
+        f&quot;ndaq_close_lead_{lag}&quot;,
+        F.lead(&quot;ndaq_close&quot;, lag).over(window_spec)
+    )
+
+# ── Calcul des rendements 1 minute (%) ──────────────────────────────────────
+# Formule : (close_t - close_{t-1}) / close_{t-1} * 100
+joined = joined.withColumn(
+    &quot;btc_return_1m&quot;,
+    F.when(
+        F.col(&quot;btc_close_lag_1&quot;).isNotNull() &amp; (F.col(&quot;btc_close_lag_1&quot;) != 0),
+        (F.col(&quot;btc_close&quot;) - F.col(&quot;btc_close_lag_1&quot;)) / F.col(&quot;btc_close_lag_1&quot;) * 100
+    ).otherwise(None)
+)
+
+joined = joined.withColumn(
+    &quot;ndaq_return_1m&quot;,
+    F.when(
+        F.col(&quot;ndaq_close_lag_1&quot;).isNotNull() &amp; (F.col(&quot;ndaq_close_lag_1&quot;) != 0),
+        (F.col(&quot;ndaq_close&quot;) - F.col(&quot;ndaq_close_lag_1&quot;)) / F.col(&quot;ndaq_close_lag_1&quot;) * 100
+    ).otherwise(None)
+)
+
+# ── Suppression de la première ligne (pas de lag_1 disponible) ───────────────
+joined = joined.filter(F.col(&quot;btc_close_lag_1&quot;).isNotNull())
+</code></pre>
+<hr />
+<h3 id="donnees-produites_2">Données produites</h3>
+<pre><code>data/usage/finance/lead_lag_analysis/dt=2026-06-30/
+├── data.parquet     ← DataFrame complet avec toutes les features
+└── _SUCCESS         ← Marqueur d'idempotence
+</code></pre>
+<h2 id="-_2">---</h2>
+<h2 id="stack-4-orchestration-avec-apache-airflow">Stack 4 — Orchestration avec Apache Airflow</h2>
+<h3 id="role_3">Rôle</h3>
+<p>Déclencher et séquencer toutes les étapes du pipeline toutes les 5 minutes,
+gérer les dépendances entre tâches, les retries et la visibilité opérationnelle.</p>
+<h3 id="technologie_3">Technologie</h3>
+<ul>
+<li><strong>Apache Airflow 2.8.1</strong> avec LocalExecutor</li>
+<li><strong>BashOperator</strong> pour chaque étape (scripts Python + dbt)</li>
+<li><strong>PostgreSQL</strong> comme metastore Airflow</li>
+</ul>
+<h3 id="fichier-concerne_1">Fichier concerné</h3>
+<ul>
+<li><code>dags/main_pipeline_dag.py</code></li>
+</ul>
+<hr />
+<h3 id="code-dag-principal">Code — DAG principal</h3>
+<pre><code class="language-python"># dags/main_pipeline_dag.py
+
+from airflow import DAG
+from airflow.operators.bash import BashOperator
+from airflow.operators.empty import EmptyOperator
+from datetime import datetime, timedelta
+
+default_args = {
+    &quot;owner&quot;:            &quot;datalake_team&quot;,
+    &quot;retries&quot;:          2,
+    &quot;retry_delay&quot;:      timedelta(minutes=2),
+    &quot;execution_timeout&quot;: timedelta(minutes=30),
+}
+
+with DAG(
+    dag_id=&quot;bigdata_btc_ndx_pipeline&quot;,
+    default_args=default_args,
+    schedule_interval=&quot;*/5 * * * *&quot;,   # toutes les 5 minutes
+    start_date=datetime(2025, 1, 1),
+    catchup=False,
+    max_active_runs=1,
+) as dag:
+
+    start = EmptyOperator(task_id=&quot;start&quot;)
+    end   = EmptyOperator(task_id=&quot;end&quot;)
+
+    # ── Ingestion (parallèle) ────────────────────────────────────────────────
+    ingest_btc = BashOperator(
+        task_id=&quot;ingest_binance_btcusdt_5m&quot;,
+        bash_command=&quot;cd /opt/airflow &amp;&amp; python3 -m src.ingestion.binance_btc_usdt &quot;
+                     &quot;--execution_date {{ ds }}&quot;
+    )
+
+    ingest_ndaq = BashOperator(
+        task_id=&quot;ingest_yahoo_ndaq_5m&quot;,
+        bash_command=&quot;cd /opt/airflow &amp;&amp; python3 -m src.ingestion.yahoo_finance &quot;
+                     &quot;--execution_date {{ ds }}&quot;
+    )
+
+    # ── Formatting Spark (parallèle) ─────────────────────────────────────────
+    format_btc = BashOperator(
+        task_id=&quot;spark_format_binance&quot;,
+        bash_command=&quot;cd /opt/airflow &amp;&amp; python3 -m src.spark_jobs.formatting.format_binance_spark &quot;
+                     &quot;--execution_date {{ ds }}&quot;
+    )
+
+    format_ndaq = BashOperator(
+        task_id=&quot;spark_format_yahoo&quot;,
+        bash_command=&quot;cd /opt/airflow &amp;&amp; python3 -m src.spark_jobs.formatting.format_yahoo_finance_spark &quot;
+                     &quot;--execution_date {{ ds }}&quot;
+    )
+
+    # ── Join + Features ──────────────────────────────────────────────────────
+    join_features = BashOperator(
+        task_id=&quot;spark_join_and_features&quot;,
+        bash_command=&quot;cd /opt/airflow &amp;&amp; python3 -m src.spark_jobs.combination.features_lead_lag_spark &quot;
+                     &quot;--execution_date {{ ds }}&quot;
+    )
+
+    # ── Chargement PostgreSQL ────────────────────────────────────────────────
+    load_postgres = BashOperator(
+        task_id=&quot;load_data_into_postgres&quot;,
+        bash_command=&quot;cd /opt/airflow &amp;&amp; python3 -m src.spark_jobs.export.load_to_warehouse &quot;
+                     &quot;--execution_date {{ ds }}&quot;
+    )
+
+    # ── dbt ─────────────────────────────────────────────────────────────────
+    dbt_run = BashOperator(
+        task_id=&quot;dbt_run&quot;,
+        bash_command=&quot;cd /opt/airflow/dbt/btc_nasdaq &amp;&amp; dbt run --profiles-dir .&quot;
+    )
+
+    # ── Elasticsearch ────────────────────────────────────────────────────────
+    elk_index = BashOperator(
+        task_id=&quot;index_to_elasticsearch&quot;,
+        bash_command=&quot;cd /opt/airflow &amp;&amp; python3 -m src.indexing.elk_indexing&quot;
+    )
+
+    # ── Dépendances ──────────────────────────────────────────────────────────
+    start &gt;&gt; [ingest_btc, ingest_ndaq]
+    ingest_btc  &gt;&gt; format_btc
+    ingest_ndaq &gt;&gt; format_ndaq
+    [format_btc, format_ndaq] &gt;&gt; join_features
+    join_features &gt;&gt; load_postgres
+    load_postgres &gt;&gt; [dbt_run, elk_index]
+    [dbt_run, elk_index] &gt;&gt; end
+</code></pre>
+<hr />
+<h3 id="graphe-des-dependances">Graphe des dépendances</h3>
+<pre><code>start
+  ├── ingest_binance_btcusdt_5m ──► spark_format_binance ──┐
+  └── ingest_yahoo_ndaq_5m      ──► spark_format_yahoo   ──┴──► spark_join_and_features
+                                                                         │
+                                                               load_data_into_postgres
+                                                                    ├── dbt_run
+                                                                    └── index_to_elasticsearch
+                                                                              │
+                                                                             end
+</code></pre>
+<h2 id="-_3">---</h2>
+<h2 id="stack-5-data-warehouse-postgresql-dbt">Stack 5 — Data Warehouse PostgreSQL + dbt</h2>
+<h3 id="role_4">Rôle</h3>
+<p>Stocker les features dans un schéma relationnel structuré,
+puis appliquer des transformations analytiques via dbt pour
+produire des modèles prêts à l'emploi (staging + marts).</p>
+<h3 id="technologie_4">Technologie</h3>
+<ul>
+<li><strong>PostgreSQL 13</strong> — stockage persistant</li>
+<li><strong>dbt-core 1.11.6 + dbt-postgres</strong> — modèles SQL versionés</li>
+</ul>
+<h3 id="fichiers-concernes_2">Fichiers concernés</h3>
+<ul>
+<li><code>docker/init-warehouse.sql</code></li>
+<li><code>dbt/btc_nasdaq/models/stagging/stg_btc_ndx_features_5m_dbt.sql</code></li>
+<li><code>dbt/btc_nasdaq/models/marts/mart_btc_ndx_5m_aligned.sql</code></li>
+<li><code>dbt/btc_nasdaq/models/marts/mart_btc_ndx_5m_enriched.sql</code></li>
+</ul>
+<hr />
+<h3 id="code-schema-postgresql-init-warehousesql">Code — Schéma PostgreSQL (init-warehouse.sql)</h3>
+<pre><code class="language-sql">-- Table principale des features lead/lag
+CREATE TABLE IF NOT EXISTS lead_lag_features (
+    id               SERIAL PRIMARY KEY,
+    ts_minute_utc    TIMESTAMP WITH TIME ZONE,
+    execution_date   DATE,
+
+    -- BTC OHLCV
+    btc_close        DOUBLE PRECISION,
+    btc_high         DOUBLE PRECISION,
+    btc_low          DOUBLE PRECISION,
+    btc_volume       DOUBLE PRECISION,
+    btc_change_pct   DOUBLE PRECISION,
+    btc_return_1m    DOUBLE PRECISION,
+
+    -- NASDAQ OHLCV (NULL hors heures de marché)
+    ndaq_close       DOUBLE PRECISION,
+    ndaq_high        DOUBLE PRECISION,
+    ndaq_low         DOUBLE PRECISION,
+    ndaq_volume      DOUBLE PRECISION,
+    ndaq_return_1m   DOUBLE PRECISION,
+
+    -- Features lag BTC (1 → 5 minutes)
+    btc_close_lag_1  DOUBLE PRECISION,
+    btc_close_lag_2  DOUBLE PRECISION,
+    btc_close_lag_3  DOUBLE PRECISION,
+    btc_close_lag_4  DOUBLE PRECISION,
+    btc_close_lag_5  DOUBLE PRECISION,
+
+    -- Features lead BTC (1 → 5 minutes)
+    btc_close_lead_1 DOUBLE PRECISION,
+    btc_close_lead_2 DOUBLE PRECISION,
+    btc_close_lead_3 DOUBLE PRECISION,
+    btc_close_lead_4 DOUBLE PRECISION,
+    btc_close_lead_5 DOUBLE PRECISION,
+
+    -- Features lag/lead NASDAQ
+    ndaq_close_lag_1  DOUBLE PRECISION,
+    ndaq_close_lead_1 DOUBLE PRECISION,
+
+    UNIQUE (ts_minute_utc, execution_date)
+);
+
+-- Vue analytique : corrélation quotidienne BTC ↔ NASDAQ
+CREATE OR REPLACE VIEW v_btc_ndaq_correlation AS
+SELECT
+    execution_date,
+    COUNT(*)                          AS record_count,
+    CORR(btc_return_1m, ndaq_return_1m) AS correlation_1m,
+    AVG(btc_return_1m)                AS avg_btc_return,
+    AVG(ndaq_return_1m)               AS avg_ndaq_return
+FROM lead_lag_features
+WHERE btc_return_1m IS NOT NULL
+  AND ndaq_return_1m IS NOT NULL
+GROUP BY execution_date
+ORDER BY execution_date DESC;
+</code></pre>
+<hr />
+<h3 id="code-modele-dbt-staging">Code — Modèle dbt Staging</h3>
+<pre><code class="language-sql">-- dbt/btc_nasdaq/models/stagging/stg_btc_ndx_features_5m_dbt.sql
+
+with source as (
+    select * from {{ source('datalake', 'lead_lag_features') }}
+),
+
+final as (
+    select
+        cast(ts_minute_utc  as timestamp)       as ts_minute_utc,
+        cast(execution_date as date)            as dt,
+
+        -- BTC
+        cast(btc_high        as double precision) as btc_high,
+        cast(btc_low         as double precision) as btc_low,
+        cast(btc_close       as double precision) as btc_close,
+        cast(btc_volume      as double precision) as btc_volume,
+        cast(btc_change_pct  as double precision) as btc_change_pct,
+        cast(btc_close_lag_1 as double precision) as btc_close_lag_1,
+        cast(btc_return_1m   as double precision) as btc_return_1m,
+
+        -- NASDAQ
+        cast(ndaq_high        as double precision) as ndaq_high,
+        cast(ndaq_low         as double precision) as ndaq_low,
+        cast(ndaq_close       as double precision) as ndaq_close,
+        cast(ndaq_volume      as double precision) as ndaq_volume,
+        cast(ndaq_close_lag_1 as double precision) as ndaq_close_lag_1,
+        cast(ndaq_return_1m   as double precision) as ndaq_return_1m
+
+    from source
+)
+
+select * from final
+</code></pre>
+<hr />
+<h3 id="code-mart-aligne-nasdaq-non-null-uniquement">Code — Mart aligné (NASDAQ non NULL uniquement)</h3>
+<pre><code class="language-sql">-- dbt/btc_nasdaq/models/marts/mart_btc_ndx_5m_aligned.sql
+
+select * from {{ ref('stg_btc_ndx_features_5m_dbt') }}
+where ndaq_close is not null   -- uniquement les instants pendant les heures de marché
+</code></pre>
+<h2 id="-_4">---</h2>
+<h2 id="stack-6-indexation-elasticsearch">Stack 6 — Indexation Elasticsearch</h2>
+<h3 id="role_5">Rôle</h3>
+<p>Indexer les données enrichies dans Elasticsearch pour permettre
+des recherches full-text, des agrégations et la visualisation temps réel dans Kibana.
+Le script est idempotent : un fichier <code>_ELKSUCCESS</code> marque les partitions déjà indexées.</p>
+<h3 id="technologie_5">Technologie</h3>
+<ul>
+<li><strong>Elasticsearch 8.11.0</strong> — moteur de recherche et d'analytics</li>
+<li><strong>elasticsearch-py</strong> — client Python officiel</li>
+<li><strong>helpers.bulk()</strong> — indexation par lots pour la performance</li>
+</ul>
+<h3 id="fichier-concerne_2">Fichier concerné</h3>
+<ul>
+<li><code>src/indexing/elk_indexing.py</code></li>
+</ul>
+<hr />
+<h3 id="code-indexation-elasticsearch">Code — Indexation Elasticsearch</h3>
+<pre><code class="language-python"># src/indexing/elk_indexing.py
+
+import os
+from pathlib import Path
+from glob import glob
+import pandas as pd
+import pyarrow.parquet as pq
+from elasticsearch import Elasticsearch, helpers
+
+# ── Connexion Elasticsearch ──────────────────────────────────────────────────
+# Priorité 1 : endpoint cloud (ELK_ENDPOINT + API key)
+# Priorité 2 : instance locale Docker (ELASTICSEARCH_HOST:PORT)
+ELK_ENDPOINT = os.getenv(&quot;ELK_ENDPOINT&quot;)
+ES_HOST      = os.getenv(&quot;ELASTICSEARCH_HOST&quot;, &quot;elasticsearch&quot;)
+ES_PORT      = os.getenv(&quot;ELASTICSEARCH_PORT&quot;, &quot;9200&quot;)
+
+if ELK_ENDPOINT:
+    client = Elasticsearch(hosts=[ELK_ENDPOINT], api_key=os.getenv(&quot;ELK_API_KEY&quot;))
+else:
+    client = Elasticsearch(hosts=[f&quot;http://{ES_HOST}:{ES_PORT}&quot;])
+
+ELK_INDEX    = &quot;finance&quot;
+USAGE_DATA   = &quot;data/usage/finance/lead_lag_analysis/&quot;
+
+def generate_docs(df: pd.DataFrame):
+    &quot;&quot;&quot;
+    Générateur de documents Elasticsearch.
+    _id = ts_minute_utc (garantit l'idempotence des indexations successives).
+    &quot;&quot;&quot;
+    for _, row in df.iterrows():
+        doc = row.to_dict()
+        _id = doc[&quot;ts_minute_utc&quot;].strftime(&quot;%Y-%m-%d %H:%M:%S&quot;)
+        # Conversion des types Python → JSON-compatibles
+        for key, value in doc.items():
+            if isinstance(value, pd.Timestamp):
+                doc[key] = value.isoformat()
+            elif pd.isna(value):
+                doc[key] = None
+        yield {&quot;_id&quot;: _id, &quot;_source&quot;: doc}
+
+def elk_index(file_path: Path):
+    &quot;&quot;&quot;
+    Lit un fichier Parquet et l'indexe en bulk dans Elasticsearch.
+    Crée _ELKSUCCESS après indexation réussie (partitions passées uniquement).
+    &quot;&quot;&quot;
+    df = pq.read_table(file_path).to_pandas()
+    df.drop_duplicates(subset=&quot;ts_minute_utc&quot;, inplace=True)
+
+    success, _ = helpers.bulk(client, generate_docs(df), index=ELK_INDEX)
+    print(f&quot;{success} documents indexés depuis {file_path}&quot;)
+
+    # Marqueur d'idempotence (pas créé pour les données du jour)
+    date_str = file_path.parent.name  # dt=YYYY-MM-DD
+    if date_str != f&quot;dt={pd.Timestamp.now().date()}&quot;:
+        (file_path.parent / &quot;_ELKSUCCESS&quot;).touch()
+
+def main():
+    &quot;&quot;&quot;
+    Parcourt toutes les partitions non encore indexées et les envoie à ES.
+    &quot;&quot;&quot;
+    folders = glob(USAGE_DATA + &quot;dt=*&quot;)
+    for folder in folders:
+        if not (Path(folder) / &quot;_ELKSUCCESS&quot;).exists():
+            elk_index(Path(folder) / &quot;data.parquet&quot;)
+</code></pre>
+<hr />
+<h3 id="mapping-de-lindex-finance">Mapping de l'index <code>finance</code></h3>
+<pre><code class="language-json">{
+  &quot;finance&quot;: {
+    &quot;mappings&quot;: {
+      &quot;properties&quot;: {
+        &quot;ts_minute_utc&quot;:    { &quot;type&quot;: &quot;date&quot; },
+        &quot;execution_date&quot;:   { &quot;type&quot;: &quot;date&quot; },
+        &quot;btc_close&quot;:        { &quot;type&quot;: &quot;float&quot; },
+        &quot;btc_return_1m&quot;:    { &quot;type&quot;: &quot;float&quot; },
+        &quot;btc_close_lag_1&quot;:  { &quot;type&quot;: &quot;float&quot; },
+        &quot;btc_close_lead_1&quot;: { &quot;type&quot;: &quot;float&quot; },
+        &quot;ndaq_close&quot;:       { &quot;type&quot;: &quot;float&quot; },
+        &quot;ndaq_return_1m&quot;:   { &quot;type&quot;: &quot;float&quot; }
+      }
+    }
+  }
+}
+</code></pre>
+<h2 id="-_5">---</h2>
+<h2 id="stack-7-visualisation-kibana">Stack 7 — Visualisation Kibana</h2>
+<h3 id="role_6">Rôle</h3>
+<p>Exposer les données financières sous forme de dashboards interactifs :
+corrélation BTC/NASDAQ, prix en temps réel, volumes, rendements.</p>
+<h3 id="technologie_6">Technologie</h3>
+<ul>
+<li><strong>Kibana 8.11.0</strong> — interface de visualisation pour Elasticsearch</li>
+<li><strong>Vega-Lite</strong> — grammaire de visualisation pour les graphiques custom (scatter plot)</li>
+</ul>
+<h3 id="acces">Accès</h3>
+<ul>
+<li>URL : http://localhost:5601</li>
+<li>Index pattern configuré : <code>finance</code> (champ temporel : <code>ts_minute_utc</code>)</li>
+</ul>
+<hr />
+<h3 id="code-scatter-plot-de-correlation-vega-lite">Code — Scatter plot de corrélation (Vega-Lite)</h3>
+<pre><code class="language-json">{
+  &quot;$schema&quot;: &quot;https://vega.github.io/schema/vega-lite/v5.json&quot;,
+  &quot;title&quot;: &quot;Corrélation BTC vs NASDAQ — Returns 1 minute&quot;,
+  &quot;data&quot;: {
+    &quot;url&quot;: {
+      &quot;%context%&quot;: true,
+      &quot;%timefield%&quot;: &quot;ts_minute_utc&quot;,
+      &quot;index&quot;: &quot;finance&quot;,
+      &quot;body&quot;: {
+        &quot;size&quot;: 1000,
+        &quot;_source&quot;: [&quot;btc_return_1m&quot;, &quot;ndaq_return_1m&quot;]
+      }
+    },
+    &quot;format&quot;: { &quot;property&quot;: &quot;hits.hits&quot; }
+  },
+  &quot;transform&quot;: [
+    { &quot;filter&quot;: &quot;isValid(datum._source.btc_return_1m) &amp;&amp; isValid(datum._source.ndaq_return_1m)&quot; },
+    { &quot;calculate&quot;: &quot;datum._source.btc_return_1m&quot;,  &quot;as&quot;: &quot;btc_return&quot; },
+    { &quot;calculate&quot;: &quot;datum._source.ndaq_return_1m&quot;, &quot;as&quot;: &quot;ndaq_return&quot; },
+    {
+      &quot;calculate&quot;: &quot;datum.btc_return &gt; 0 &amp;&amp; datum.ndaq_return &gt; 0 ? 'Les deux haussiers' : datum.btc_return &lt; 0 &amp;&amp; datum.ndaq_return &lt; 0 ? 'Les deux baissiers' : 'Divergence'&quot;,
+      &quot;as&quot;: &quot;quadrant&quot;
+    }
+  ],
+  &quot;mark&quot;: { &quot;type&quot;: &quot;point&quot;, &quot;filled&quot;: true, &quot;size&quot;: 60, &quot;opacity&quot;: 0.75 },
+  &quot;encoding&quot;: {
+    &quot;x&quot;: { &quot;field&quot;: &quot;btc_return&quot;,  &quot;type&quot;: &quot;quantitative&quot;, &quot;title&quot;: &quot;BTC Return 1m (%)&quot; },
+    &quot;y&quot;: { &quot;field&quot;: &quot;ndaq_return&quot;, &quot;type&quot;: &quot;quantitative&quot;, &quot;title&quot;: &quot;NASDAQ Return 1m (%)&quot; },
+    &quot;color&quot;: {
+      &quot;field&quot;: &quot;quadrant&quot;, &quot;type&quot;: &quot;nominal&quot;,
+      &quot;scale&quot;: {
+        &quot;domain&quot;: [&quot;Les deux haussiers&quot;, &quot;Les deux baissiers&quot;, &quot;Divergence&quot;],
+        &quot;range&quot;: [&quot;#00b300&quot;, &quot;#cc0000&quot;, &quot;#ff9900&quot;]
+      }
+    },
+    &quot;tooltip&quot;: [
+      { &quot;field&quot;: &quot;btc_return&quot;,  &quot;title&quot;: &quot;BTC Return (%)&quot;,   &quot;format&quot;: &quot;.4f&quot; },
+      { &quot;field&quot;: &quot;ndaq_return&quot;, &quot;title&quot;: &quot;NASDAQ Return (%)&quot;, &quot;format&quot;: &quot;.4f&quot; },
+      { &quot;field&quot;: &quot;quadrant&quot;,    &quot;title&quot;: &quot;Signal&quot; }
+    ]
+  }
+}
+</code></pre>
+<hr />
+<h3 id="dashboards-recommandes">Dashboards recommandés</h3>
+<table>
+<thead>
+<tr>
+<th>Visualisation</th>
+<th>Type Kibana</th>
+<th>Champs utilisés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prix BTC + NASDAQ</td>
+<td>Line (double axe)</td>
+<td><code>btc_close</code>, <code>ndaq_close</code></td>
+</tr>
+<tr>
+<td>Returns 1m</td>
+<td>Area</td>
+<td><code>btc_return_1m</code>, <code>ndaq_return_1m</code></td>
+</tr>
+<tr>
+<td>Corrélation</td>
+<td>Vega scatter</td>
+<td><code>btc_return_1m</code>, <code>ndaq_return_1m</code></td>
+</tr>
+<tr>
+<td>Volume</td>
+<td>Vertical Bar</td>
+<td><code>btc_volume</code>, <code>ndaq_volume</code></td>
+</tr>
+<tr>
+<td>Volatilité</td>
+<td>Line (fill)</td>
+<td><code>btc_high</code>, <code>btc_low</code></td>
+</tr>
+<tr>
+<td>Lead/Lag</td>
+<td>Line (4 séries)</td>
+<td><code>btc_close</code>, <code>btc_close_lag_1</code>, <code>ndaq_close</code>, <code>ndaq_close_lead_1</code></td>
+</tr>
+<tr>
+<td>KPI docs indexés</td>
+<td>Metric</td>
+<td><code>Count</code></td>
+</tr>
+<tr>
+<td>Table runs</td>
+<td>Data Table</td>
+<td><code>ts_minute_utc</code> + métriques</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="generation-du-pdf">Génération du PDF</h2>
+<p>Pour convertir ce guide en PDF :</p>
+<pre><code class="language-bash"># Avec pandoc
+pandoc docs/TECHNICAL_STACK.md -o docs/TECHNICAL_STACK.pdf \
+  --pdf-engine=xelatex \
+  -V geometry:margin=2cm \
+  -V fontsize=11pt
+
+# Ou via un navigateur
+# Ouvrir le fichier .md dans VS Code → Ctrl+Shift+P → &quot;Markdown: Open Preview&quot;
+# Puis Ctrl+P → &quot;Save as PDF&quot;
+</code></pre>
+<hr />
+<p><em>StreamFlow Finance — DATA705 P2 — 2025/2026</em></p></body></html>

@@ -16,13 +16,15 @@ USAGE_DATA = "data/usage/finance/lead_lag_analysis/"
 
 ELK_ENDPOINT = os.getenv("ELK_ENDPOINT")
 ELK_API_KEY = os.getenv("ELK_API_KEY")
+ES_HOST = os.getenv("ELASTICSEARCH_HOST", "elasticsearch")
+ES_PORT = os.getenv("ELASTICSEARCH_PORT", "9200")
 
 ELK_INDEX = "finance"
 
-client = Elasticsearch(
-    hosts=[ELK_ENDPOINT],
-    api_key=ELK_API_KEY
-)
+if ELK_ENDPOINT:
+    client = Elasticsearch(hosts=[ELK_ENDPOINT], api_key=ELK_API_KEY)
+else:
+    client = Elasticsearch(hosts=[f"http://{ES_HOST}:{ES_PORT}"])
 
 def get_data_date(filepath: Path) -> Tuple[str | None, bool]:
     is_today = False
