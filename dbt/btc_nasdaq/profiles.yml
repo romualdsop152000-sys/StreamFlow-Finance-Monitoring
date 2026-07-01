@@ -1,12 +1,12 @@
 btc_nasdaq:
   outputs:
     dev:
-      dbname: datalake
-      host: datalake-warehouse
-      pass: datalake_pass
-      port: 5432
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'datalake-warehouse') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5432') | int }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'datalake') }}"
+      user: "{{ env_var('POSTGRES_USER', 'datalake_user') }}"
+      pass: "{{ env_var('POSTGRES_PASSWORD', 'datalake_pass') }}"
       schema: btc_nasdaq
       threads: 1
-      type: postgres
-      user: datalake_user
   target: dev
