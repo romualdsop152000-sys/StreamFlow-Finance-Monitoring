@@ -146,5 +146,4 @@ with DAG(
     [t_format_binance, t_format_yahoo] >> t_combine
     
     # Suite séquentielle
-    t_combine >> t_export_pg >> t_index_elastic >> end
-    # t_combine >> t_export_pg >> t_dbt_run >> t_index_elastic >> end
+    t_combine >> t_export_pg >> t_dbt_run >> t_index_elastic >> end
