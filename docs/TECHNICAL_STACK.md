@@ -7,7 +7,7 @@
 
 ```
 [Binance API]  ──►  [Raw JSON]  ──►  [Spark Format]  ──┐
-                                                         ├──►  [Spark Join + Features]
+                                                         ├──►  [Spark Join + Features + LOCF]
 [Yahoo Finance] ──►  [Raw CSV]  ──►  [Spark Format]  ──┘
                                             │
                     ┌───────────────────────┴───────────────────────┐
@@ -18,6 +18,60 @@
 ```
 
 Chaque couche est orchestrée par **Apache Airflow** toutes les 5 minutes.
+
+---
+
+## Sécurité — Variables d'environnement
+
+> **Modification apportée** : tous les identifiants codés en dur ont été externalisés dans
+> `docker/.env` (fichier gitignored). Aucun secret ne transit plus dans le code source.
+
+### Fichiers concernés
+- `docker/.env` — secrets locaux (gitignored, ne jamais commiter)
+- `docker/.env.example` — template à copier (commité, sans valeurs réelles)
+- `dbt/btc_nasdaq/profiles.yml` — utilise `env_var()` dbt
+
+### Contenu de `docker/.env.example`
+
+```ini
+# Copier ce fichier en .env et renseigner les valeurs réelles
+AIRFLOW_POSTGRES_USER=airflow
+AIRFLOW_POSTGRES_PASSWORD=change_me
+AIRFLOW_POSTGRES_DB=airflow
+
+POSTGRES_HOST=postgres-warehouse
+POSTGRES_PORT=5432
+POSTGRES_DB=datalake
+POSTGRES_USER=datalake_user
+POSTGRES_PASSWORD=change_me
+
+AIRFLOW_ADMIN_USER=admin
+AIRFLOW_ADMIN_PASSWORD=change_me
+AIRFLOW_ADMIN_EMAIL=admin@example.com
+
+PGADMIN_DEFAULT_EMAIL=admin@admin.com
+PGADMIN_DEFAULT_PASSWORD=change_me
+
+ELASTICSEARCH_HOST=elasticsearch
+ELASTICSEARCH_PORT=9200
+```
+
+### Profiles dbt (`dbt/btc_nasdaq/profiles.yml`)
+
+```yaml
+btc_nasdaq:
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'datalake-warehouse') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5432') | int }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'datalake') }}"
+      user: "{{ env_var('POSTGRES_USER', 'datalake_user') }}"
+      pass: "{{ env_var('POSTGRES_PASSWORD', 'datalake_pass') }}"
+      schema: btc_nasdaq
+      threads: 1
+  target: dev
+```
 
 ---
 
@@ -163,8 +217,8 @@ def save_raw_data_locally(df: pd.DataFrame, execution_date: str) -> str:
 
 ```
 data/raw/
-├── finance/crypto/binance/btc_usdt/dt=2026-06-30/data.json   ← lignes NDJSON
-└── market/yfinance/nasdaq_100/dt=2026-06-30/data.csv         ← CSV OHLCV
+├── finance/crypto/binance/btc_usdt/dt=2026-07-02/data.json   ← lignes NDJSON
+└── market/yfinance/nasdaq_100/dt=2026-07-02/data.csv         ← CSV OHLCV
 ```
 
 ---
@@ -282,90 +336,233 @@ def format_yahoo(execution_date: str):
 
 ```
 data/formatted/
-├── finance/crypto/binance/btc_usdt/dt=2026-06-30/*.parquet
-└── market/yfinance/nasdaq_100/dt=2026-06-30/*.parquet
+├── finance/crypto/binance/btc_usdt/dt=2026-07-02/*.parquet
+└── market/yfinance/nasdaq_100/dt=2026-07-02/*.parquet
 ```
 
 ---
 ---
 
-## Stack 3 — Feature Engineering (Lead / Lag)
+## Stack 3 — Feature Engineering (Lead / Lag + LOCF)
 
 ### Rôle
 Joindre les données BTC et NASDAQ sur le timestamp commun, puis générer
 les features temporelles (lag/lead sur 1 à 5 minutes) et les rendements.
 Ces features sont le cœur de l'analyse de corrélation.
 
+> **Modifications apportées :**
+> 1. Ajout du flag `ndaq_market_open` (TRUE pendant 14h30–21h00 UTC)
+> 2. Implémentation du **LOCF cross-day** (Last Observation Carried Forward) :
+>    propagation du dernier prix NASDAQ connu à travers les heures de fermeture,
+>    y compris en début de journée via une graine chargée depuis J-1.
+>    Standard utilisé par Bloomberg, Reuters et les fournisseurs de données financières.
+
 ### Technologie
-- **PySpark Window Functions** : `lag()`, `lead()` sur une fenêtre ordonnée par `ts_minute_utc`
+- **PySpark Window Functions** : `lag()`, `lead()`, `last(ignorenulls=True)` sur une fenêtre ordonnée par `ts_minute_utc`
 - **Left Join** : préserve tous les instants BTC (24/7), NASDAQ NULL hors heures de marché
+- **LOCF** : Last Observation Carried Forward — prix constant entre deux sessions
 
 ### Fichier concerné
 - `src/spark_jobs/combination/features_lead_lag_spark.py`
 
 ---
 
-### Code — Join et génération des features
+### Principe du LOCF cross-day
+
+```
+J-1  21:00 UTC → dernier prix NASDAQ connu  ← graine chargée depuis dt=J-1
+J    00:00 UTC → ndaq_close = prix J-1 (LOCF), ndaq_market_open = FALSE
+     ...
+J    14:30 UTC → NASDAQ ouvre, vraies données, ndaq_market_open = TRUE
+     ...
+J    21:00 UTC → NASDAQ ferme, LOCF repart depuis le dernier prix
+```
+
+Pendant les heures de fermeture, `ndaq_return_1m ≈ 0%` car le prix est constant :
+**(prix_t - prix_{t-1}) / prix_{t-1} = 0**. C'est sémantiquement correct.
+
+---
+
+### Code — Join, LOCF et génération des features
 
 ```python
 # src/spark_jobs/combination/features_lead_lag_spark.py
 
+import argparse
+import os
+from datetime import datetime, timedelta
+import pyarrow as pa
+import pyarrow.parquet as pq
+from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
-# ── Join BTC ◄► NASDAQ sur ts_minute_utc ──────────────────────────────────
-# LEFT JOIN : tous les points BTC sont conservés.
-# Quand le NASDAQ est fermé → ndaq_close = NULL pour ces instants.
-joined = btc_renamed.join(ndaq_renamed, on="ts_minute_utc", how="left")
 
-# ── Fenêtre temporelle (ordre chronologique global) ─────────────────────────
-window_spec = Window.orderBy("ts_minute_utc")
+def main(execution_date: str, max_lag_minutes: int = 5):
+    spark = SparkSession.builder \
+        .appName("lead_lag_features") \
+        .config("spark.sql.legacy.timeParserPolicy", "LEGACY") \
+        .getOrCreate()
 
-# ── Génération des features lag et lead (1 → 5 minutes) ─────────────────────
-for lag in range(1, max_lag_minutes + 1):
-    # BTC : lag (passé) et lead (futur)
-    joined = joined.withColumn(
-        f"btc_close_lag_{lag}",
-        F.lag("btc_close", lag).over(window_spec)
-    )
-    joined = joined.withColumn(
-        f"btc_close_lead_{lag}",
-        F.lead("btc_close", lag).over(window_spec)
-    )
-    joined = joined.withColumn(
-        f"btc_volume_lag_{lag}",
-        F.lag("btc_volume", lag).over(window_spec)
-    )
-    # NASDAQ : même logique (NULL si marché fermé)
-    joined = joined.withColumn(
-        f"ndaq_close_lag_{lag}",
-        F.lag("ndaq_close", lag).over(window_spec)
-    )
-    joined = joined.withColumn(
-        f"ndaq_close_lead_{lag}",
-        F.lead("ndaq_close", lag).over(window_spec)
+    btc_path  = f"data/formatted/finance/crypto/binance/btc_usdt/dt={execution_date}"
+    ndaq_path = f"data/formatted/market/yfinance/nasdaq_100/dt={execution_date}"
+
+    # ── Lecture BTC ──────────────────────────────────────────────────────────
+    btc = spark.read.parquet(btc_path)
+    btc_renamed = btc.select(
+        F.col("ts_minute_utc"),
+        F.col("close").alias("btc_close"),
+        F.col("volume").alias("btc_volume"),
+        F.col("high").alias("btc_high"),
+        F.col("low").alias("btc_low"),
+        F.col("price_change_pct").alias("btc_change_pct")
     )
 
-# ── Calcul des rendements 1 minute (%) ──────────────────────────────────────
-# Formule : (close_t - close_{t-1}) / close_{t-1} * 100
-joined = joined.withColumn(
-    "btc_return_1m",
-    F.when(
-        F.col("btc_close_lag_1").isNotNull() & (F.col("btc_close_lag_1") != 0),
-        (F.col("btc_close") - F.col("btc_close_lag_1")) / F.col("btc_close_lag_1") * 100
-    ).otherwise(None)
-)
+    # ── Graine LOCF cross-day : dernier prix NASDAQ de J-1 ──────────────────
+    # Permet de propager le prix de clôture de la veille dès 00h00 UTC
+    # afin que le forward-fill ait un point de départ avant l'ouverture du marché.
+    prev_date     = (datetime.strptime(execution_date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    prev_ndaq_path = f"data/formatted/market/yfinance/nasdaq_100/dt={prev_date}"
+    seed_row = None
+    if os.path.exists(prev_ndaq_path):
+        prev_ndaq = spark.read.parquet(prev_ndaq_path)
+        if prev_ndaq.count() > 0:
+            seed_row = prev_ndaq.orderBy(F.col("ts_minute_utc").desc()).limit(1).select(
+                F.col("close").alias("ndaq_close"),
+                F.col("volume").alias("ndaq_volume"),
+                F.col("high").alias("ndaq_high"),
+                F.col("low").alias("ndaq_low"),
+            )
+            print(f"[INFO] LOCF seed loaded from {prev_ndaq_path}")
 
-joined = joined.withColumn(
-    "ndaq_return_1m",
-    F.when(
-        F.col("ndaq_close_lag_1").isNotNull() & (F.col("ndaq_close_lag_1") != 0),
-        (F.col("ndaq_close") - F.col("ndaq_close_lag_1")) / F.col("ndaq_close_lag_1") * 100
-    ).otherwise(None)
-)
+    # ── Lecture NASDAQ (peut être vide avant 14h30 UTC) ─────────────────────
+    has_ndaq = os.path.exists(ndaq_path)
 
-# ── Suppression de la première ligne (pas de lag_1 disponible) ───────────────
-joined = joined.filter(F.col("btc_close_lag_1").isNotNull())
+    if has_ndaq:
+        ndaq       = spark.read.parquet(ndaq_path)
+        ndaq_count = ndaq.count()
+
+        if ndaq_count > 0:
+            ndaq_renamed = ndaq.select(
+                F.col("ts_minute_utc"),
+                F.col("close").alias("ndaq_close"),
+                F.col("volume").alias("ndaq_volume"),
+                F.col("high").alias("ndaq_high"),
+                F.col("low").alias("ndaq_low"),
+            )
+        else:
+            has_ndaq = False
+
+    if has_ndaq:
+        # LEFT JOIN : BTC conservé 24/7, NASDAQ NULL hors heures de marché
+        joined = btc_renamed.join(ndaq_renamed, on="ts_minute_utc", how="left")
+
+        # Marquer les heures d'ouverture AVANT le forward-fill
+        # (après, tout serait TRUE puisque le prix est propagé)
+        joined = joined.withColumn("ndaq_market_open", F.col("ndaq_close").isNotNull())
+
+        # ── Injection de la graine J-1 sur le premier enregistrement ────────
+        # Le LEFT JOIN exclut le timestamp J-1 (hors plage BTC d'aujourd'hui),
+        # donc on injecte les valeurs directement sur la première ligne NULL
+        # pour amorcer le forward-fill depuis le début de la journée.
+        if seed_row is not None:
+            seed_vals = seed_row.first()
+            min_ts    = joined.agg(F.min("ts_minute_utc")).first()[0]
+            for col_name, seed_val in [
+                ("ndaq_close",  float(seed_vals["ndaq_close"])),
+                ("ndaq_volume", float(seed_vals["ndaq_volume"])),
+                ("ndaq_high",   float(seed_vals["ndaq_high"])),
+                ("ndaq_low",    float(seed_vals["ndaq_low"])),
+            ]:
+                joined = joined.withColumn(
+                    col_name,
+                    F.when(
+                        (F.col("ts_minute_utc") == F.lit(min_ts)) & F.col(col_name).isNull(),
+                        F.lit(seed_val)
+                    ).otherwise(F.col(col_name))
+                )
+            print(f"[INFO] LOCF seed injected at first row ({min_ts})")
+
+        # ── Forward-fill (LOCF intra-day + cross-day via graine) ────────────
+        # Propage le dernier prix connu à tous les instants NULL suivants.
+        # Résultat : ndaq_close non NULL 24/7, ndaq_return_1m ≈ 0% hors marché.
+        window_ffill = Window.orderBy("ts_minute_utc").rowsBetween(Window.unboundedPreceding, 0)
+        for ndaq_col in ["ndaq_close", "ndaq_volume", "ndaq_high", "ndaq_low"]:
+            joined = joined.withColumn(
+                ndaq_col,
+                F.last(F.col(ndaq_col), ignorenulls=True).over(window_ffill)
+            )
+        print("[INFO] NASDAQ LOCF (cross-day) applied")
+
+    else:
+        # Aucune donnée NASDAQ pour ce jour : appliquer la graine J-1 comme constante
+        print(f"[WARNING] NASDAQ data not found or empty for {execution_date}")
+        if seed_row is not None:
+            seed_vals  = seed_row.first()
+            print(f"[INFO] LOCF from J-1: ndaq_close={float(seed_vals['ndaq_close']):.2f}")
+            joined = btc_renamed \
+                .withColumn("ndaq_close",  F.lit(float(seed_vals["ndaq_close"])).cast("double")) \
+                .withColumn("ndaq_volume", F.lit(float(seed_vals["ndaq_volume"])).cast("double")) \
+                .withColumn("ndaq_high",   F.lit(float(seed_vals["ndaq_high"])).cast("double")) \
+                .withColumn("ndaq_low",    F.lit(float(seed_vals["ndaq_low"])).cast("double")) \
+                .withColumn("ndaq_market_open", F.lit(False))
+        else:
+            # Premier jour d'exécution : pas de graine disponible, NULLs inévitables
+            joined = btc_renamed \
+                .withColumn("ndaq_close",       F.lit(None).cast("double")) \
+                .withColumn("ndaq_volume",      F.lit(None).cast("double")) \
+                .withColumn("ndaq_high",        F.lit(None).cast("double")) \
+                .withColumn("ndaq_low",         F.lit(None).cast("double")) \
+                .withColumn("ndaq_market_open", F.lit(False))
+
+    # ── Features lag / lead (1 → 5 minutes) ─────────────────────────────────
+    window_spec = Window.orderBy("ts_minute_utc")
+
+    for lag in range(1, max_lag_minutes + 1):
+        joined = joined.withColumn(f"btc_close_lag_{lag}",   F.lag("btc_close", lag).over(window_spec))
+        joined = joined.withColumn(f"btc_close_lead_{lag}",  F.lead("btc_close", lag).over(window_spec))
+        joined = joined.withColumn(f"btc_volume_lag_{lag}",  F.lag("btc_volume", lag).over(window_spec))
+        if has_ndaq:
+            joined = joined.withColumn(f"ndaq_close_lag_{lag}",  F.lag("ndaq_close", lag).over(window_spec))
+            joined = joined.withColumn(f"ndaq_close_lead_{lag}", F.lead("ndaq_close", lag).over(window_spec))
+
+    # ── Rendements 1 minute (%) ──────────────────────────────────────────────
+    joined = joined.withColumn(
+        "btc_return_1m",
+        F.when(
+            F.col("btc_close_lag_1").isNotNull() & (F.col("btc_close_lag_1") != 0),
+            (F.col("btc_close") - F.col("btc_close_lag_1")) / F.col("btc_close_lag_1") * 100
+        ).otherwise(None)
+    )
+
+    if has_ndaq:
+        joined = joined.withColumn(
+            "ndaq_return_1m",
+            F.when(
+                F.col("ndaq_close_lag_1").isNotNull() & (F.col("ndaq_close_lag_1") != 0),
+                (F.col("ndaq_close") - F.col("ndaq_close_lag_1")) / F.col("ndaq_close_lag_1") * 100
+            ).otherwise(None)
+        )
+
+    # Ajouter métadonnées
+    joined = joined.withColumn("processed_at_utc", F.current_timestamp())
+    joined = joined.withColumn("execution_date", F.lit(execution_date))
+
+    # Supprimer la première ligne (lag_1 non disponible)
+    joined = joined.filter(F.col("btc_close_lag_1").isNotNull())
+
+    # ── Sauvegarde Parquet ───────────────────────────────────────────────────
+    os.makedirs(output_path, exist_ok=True)
+    pdf   = joined.toPandas()
+    table = pa.Table.from_pandas(pdf)
+    pq.write_table(table, os.path.join(output_path, "data.parquet"),
+                   coerce_timestamps='us', allow_truncated_timestamps=True)
+
+    with open(os.path.join(output_path, "_SUCCESS"), "w"):
+        pass
+
+    print(f"[SUCCESS] Wrote {len(pdf)} lead-lag features to {output_path}")
+    spark.stop()
 ```
 
 ---
@@ -373,9 +570,9 @@ joined = joined.filter(F.col("btc_close_lag_1").isNotNull())
 ### Données produites
 
 ```
-data/usage/finance/lead_lag_analysis/dt=2026-06-30/
-├── data.parquet     ← DataFrame complet avec toutes les features
-└── _SUCCESS         ← Marqueur d'idempotence
+data/usage/finance/lead_lag_analysis/dt=2026-07-02/
+├── data.parquet     ← DataFrame complet avec toutes les features + ndaq_market_open
+└── _SUCCESS         ← Marqueur d'idempotence Spark
 ```
 
 ---
@@ -389,11 +586,16 @@ gérer les dépendances entre tâches, les retries et la visibilité opérationn
 
 ### Technologie
 - **Apache Airflow 2.8.1** avec LocalExecutor
-- **BashOperator** pour chaque étape (scripts Python + dbt)
+- **PythonOperator + BashOperator** pour chaque étape
 - **PostgreSQL** comme metastore Airflow
 
 ### Fichier concerné
 - `dags/main_pipeline_dag.py`
+
+> **Modifications apportées :**
+> 1. `t_dbt_run` était une tâche orpheline (déconnectée du graphe) — reconnectée dans la chaîne séquentielle
+> 2. Nom de table corrigé : `"btc_nasdaq"` → `"lead_lag_features"` (table cible réelle)
+> 3. Chaîne finale : `t_combine >> t_export_pg >> t_dbt_run >> t_index_elastic >> end`
 
 ---
 
@@ -402,90 +604,103 @@ gérer les dépendances entre tâches, les retries et la visibilité opérationn
 ```python
 # dags/main_pipeline_dag.py
 
-from airflow import DAG
-from airflow.operators.bash import BashOperator
-from airflow.operators.empty import EmptyOperator
 from datetime import datetime, timedelta
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.operators.empty import EmptyOperator
+from airflow.operators.bash import BashOperator
+from src.postgres.load import load_data_in_postgres
 
-default_args = {
-    "owner":            "datalake_team",
-    "retries":          2,
-    "retry_delay":      timedelta(minutes=2),
+PROJECT_ROOT = "/opt/airflow"
+SPARK_SUBMIT = "spark-submit"
+DBT_DIR      = f"{PROJECT_ROOT}/dbt/btc_nasdaq"
+BTC_NASDAQ_USAGE_DATA_PATH = "data/usage/finance/lead_lag_analysis/"
+
+SPARK_CONF = (
+    '--conf "spark.hadoop.fs.permissions.enabled=false" '
+    '--conf "spark.driver.memory=1g" '
+)
+
+DEFAULT_ARGS = {
+    "owner": "datalake_team",
+    "depends_on_past": False,
+    "retries": 2,
+    "retry_delay": timedelta(minutes=2),
     "execution_timeout": timedelta(minutes=30),
 }
 
 with DAG(
     dag_id="bigdata_btc_ndx_pipeline",
-    default_args=default_args,
-    schedule_interval="*/5 * * * *",   # toutes les 5 minutes
+    default_args=DEFAULT_ARGS,
+    schedule="*/5 * * * *",
     start_date=datetime(2025, 1, 1),
     catchup=False,
     max_active_runs=1,
+    tags=["bigdata", "datalake", "spark", "dbt", "postgres", "elastic"],
 ) as dag:
 
     start = EmptyOperator(task_id="start")
     end   = EmptyOperator(task_id="end")
 
     # ── Ingestion (parallèle) ────────────────────────────────────────────────
-    ingest_btc = BashOperator(
+    t_ingest_binance = PythonOperator(
         task_id="ingest_binance_btcusdt_5m",
-        bash_command="cd /opt/airflow && python3 -m src.ingestion.binance_btc_usdt "
-                     "--execution_date {{ ds }}"
+        python_callable=ingest_binance_btcusdt,
     )
-
-    ingest_ndaq = BashOperator(
+    t_ingest_yahoo = PythonOperator(
         task_id="ingest_yahoo_ndaq_5m",
-        bash_command="cd /opt/airflow && python3 -m src.ingestion.yahoo_finance "
-                     "--execution_date {{ ds }}"
+        python_callable=ingest_yahoo_finance_ndaq,
     )
 
     # ── Formatting Spark (parallèle) ─────────────────────────────────────────
-    format_btc = BashOperator(
+    t_format_binance = BashOperator(
         task_id="spark_format_binance",
-        bash_command="cd /opt/airflow && python3 -m src.spark_jobs.formatting.format_binance_spark "
-                     "--execution_date {{ ds }}"
+        bash_command=f"cd {PROJECT_ROOT} && {SPARK_SUBMIT} {SPARK_CONF} "
+                     f"src/spark_jobs/formatting/format_binance_spark.py "
+                     f"--execution_date '{{{{ ds }}}}'",
     )
-
-    format_ndaq = BashOperator(
+    t_format_yahoo = BashOperator(
         task_id="spark_format_yahoo",
-        bash_command="cd /opt/airflow && python3 -m src.spark_jobs.formatting.format_yahoo_finance_spark "
-                     "--execution_date {{ ds }}"
+        bash_command=f"cd {PROJECT_ROOT} && {SPARK_SUBMIT} {SPARK_CONF} "
+                     f"src/spark_jobs/formatting/format_yahoo_finance_spark.py "
+                     f"--execution_date '{{{{ ds }}}}'",
     )
 
-    # ── Join + Features ──────────────────────────────────────────────────────
-    join_features = BashOperator(
+    # ── Join + Features LOCF ─────────────────────────────────────────────────
+    t_combine = BashOperator(
         task_id="spark_join_and_features",
-        bash_command="cd /opt/airflow && python3 -m src.spark_jobs.combination.features_lead_lag_spark "
-                     "--execution_date {{ ds }}"
+        bash_command=f"cd {PROJECT_ROOT} && {SPARK_SUBMIT} {SPARK_CONF} "
+                     f"src/spark_jobs/combination/features_lead_lag_spark.py "
+                     f"--execution_date '{{{{ ds }}}}'",
     )
 
-    # ── Chargement PostgreSQL ────────────────────────────────────────────────
-    load_postgres = BashOperator(
+    # ── Chargement PostgreSQL — table lead_lag_features ───────────────────────
+    # CORRECTION : nom de table "lead_lag_features" (était "btc_nasdaq" par erreur)
+    t_export_pg = PythonOperator(
         task_id="load_data_into_postgres",
-        bash_command="cd /opt/airflow && python3 -m src.spark_jobs.export.load_to_warehouse "
-                     "--execution_date {{ ds }}"
+        python_callable=load_data_in_postgres,
+        op_args=[BTC_NASDAQ_USAGE_DATA_PATH, "lead_lag_features"],
     )
 
-    # ── dbt ─────────────────────────────────────────────────────────────────
-    dbt_run = BashOperator(
+    # ── dbt : modèles staging + marts ───────────────────────────────────────
+    # CORRECTION : reconnecté dans la chaîne (était orphelin)
+    t_dbt_run = BashOperator(
         task_id="dbt_run",
-        bash_command="cd /opt/airflow/dbt/btc_nasdaq && dbt run --profiles-dir ."
+        bash_command=f"cd {DBT_DIR} && dbt run --profiles-dir .",
     )
 
-    # ── Elasticsearch ────────────────────────────────────────────────────────
-    elk_index = BashOperator(
+    # ── Indexation Elasticsearch ─────────────────────────────────────────────
+    t_index_elastic = BashOperator(
         task_id="index_to_elasticsearch",
-        bash_command="cd /opt/airflow && python3 -m src.indexing.elk_indexing"
+        bash_command=f"cd {PROJECT_ROOT} && python3 -m src.indexing.elk_indexing",
     )
 
-    # ── Dépendances ──────────────────────────────────────────────────────────
-    start >> [ingest_btc, ingest_ndaq]
-    ingest_btc  >> format_btc
-    ingest_ndaq >> format_ndaq
-    [format_btc, format_ndaq] >> join_features
-    join_features >> load_postgres
-    load_postgres >> [dbt_run, elk_index]
-    [dbt_run, elk_index] >> end
+    # ── Graphe de dépendances corrigé ────────────────────────────────────────
+    start >> [t_ingest_binance, t_ingest_yahoo]
+    t_ingest_binance >> t_format_binance
+    t_ingest_yahoo   >> t_format_yahoo
+    [t_format_binance, t_format_yahoo] >> t_combine
+    t_combine >> t_export_pg >> t_dbt_run >> t_index_elastic >> end
 ```
 
 ---
@@ -498,10 +713,12 @@ start
   └── ingest_yahoo_ndaq_5m      ──► spark_format_yahoo   ──┴──► spark_join_and_features
                                                                          │
                                                                load_data_into_postgres
-                                                                    ├── dbt_run
-                                                                    └── index_to_elasticsearch
-                                                                              │
-                                                                             end
+                                                                         │
+                                                                      dbt_run
+                                                                         │
+                                                               index_to_elasticsearch
+                                                                         │
+                                                                        end
 ```
 
 ---
@@ -520,13 +737,16 @@ produire des modèles prêts à l'emploi (staging + marts).
 
 ### Fichiers concernés
 - `docker/init-warehouse.sql`
+- `src/postgres/load.py`
 - `dbt/btc_nasdaq/models/stagging/stg_btc_ndx_features_5m_dbt.sql`
 - `dbt/btc_nasdaq/models/marts/mart_btc_ndx_5m_aligned.sql`
-- `dbt/btc_nasdaq/models/marts/mart_btc_ndx_5m_enriched.sql`
 
 ---
 
 ### Code — Schéma PostgreSQL (init-warehouse.sql)
+
+> **Modification apportée :** ajout de la colonne `ndaq_market_open BOOLEAN`
+> pour distinguer les instants pendant les heures de trading des instants LOCF.
 
 ```sql
 -- Table principale des features lead/lag
@@ -543,12 +763,15 @@ CREATE TABLE IF NOT EXISTS lead_lag_features (
     btc_change_pct   DOUBLE PRECISION,
     btc_return_1m    DOUBLE PRECISION,
 
-    -- NASDAQ OHLCV (NULL hors heures de marché)
-    ndaq_close       DOUBLE PRECISION,
-    ndaq_high        DOUBLE PRECISION,
-    ndaq_low         DOUBLE PRECISION,
-    ndaq_volume      DOUBLE PRECISION,
-    ndaq_return_1m   DOUBLE PRECISION,
+    -- NASDAQ OHLCV
+    -- Après LOCF cross-day : ndaq_close non NULL 24/7
+    -- ndaq_market_open = TRUE uniquement pendant les heures réelles (14h30–21h00 UTC)
+    ndaq_close        DOUBLE PRECISION,
+    ndaq_high         DOUBLE PRECISION,
+    ndaq_low          DOUBLE PRECISION,
+    ndaq_volume       DOUBLE PRECISION,
+    ndaq_return_1m    DOUBLE PRECISION,
+    ndaq_market_open  BOOLEAN,          -- TRUE pendant les heures de trading
 
     -- Features lag BTC (1 → 5 minutes)
     btc_close_lag_1  DOUBLE PRECISION,
@@ -556,6 +779,11 @@ CREATE TABLE IF NOT EXISTS lead_lag_features (
     btc_close_lag_3  DOUBLE PRECISION,
     btc_close_lag_4  DOUBLE PRECISION,
     btc_close_lag_5  DOUBLE PRECISION,
+    btc_volume_lag_1 DOUBLE PRECISION,
+    btc_volume_lag_2 DOUBLE PRECISION,
+    btc_volume_lag_3 DOUBLE PRECISION,
+    btc_volume_lag_4 DOUBLE PRECISION,
+    btc_volume_lag_5 DOUBLE PRECISION,
 
     -- Features lead BTC (1 → 5 minutes)
     btc_close_lead_1 DOUBLE PRECISION,
@@ -564,26 +792,121 @@ CREATE TABLE IF NOT EXISTS lead_lag_features (
     btc_close_lead_4 DOUBLE PRECISION,
     btc_close_lead_5 DOUBLE PRECISION,
 
-    -- Features lag/lead NASDAQ
+    -- Features lag/lead NASDAQ (1 → 5 minutes)
     ndaq_close_lag_1  DOUBLE PRECISION,
+    ndaq_close_lag_2  DOUBLE PRECISION,
+    ndaq_close_lag_3  DOUBLE PRECISION,
+    ndaq_close_lag_4  DOUBLE PRECISION,
+    ndaq_close_lag_5  DOUBLE PRECISION,
     ndaq_close_lead_1 DOUBLE PRECISION,
+    ndaq_close_lead_2 DOUBLE PRECISION,
+    ndaq_close_lead_3 DOUBLE PRECISION,
+    ndaq_close_lead_4 DOUBLE PRECISION,
+    ndaq_close_lead_5 DOUBLE PRECISION,
+
+    -- Métadonnées
+    processed_at_utc TIMESTAMP WITH TIME ZONE,
+    loaded_at_utc    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    source_file      TEXT,
 
     UNIQUE (ts_minute_utc, execution_date)
 );
+
+CREATE INDEX IF NOT EXISTS idx_leadlag_ts   ON lead_lag_features (ts_minute_utc);
+CREATE INDEX IF NOT EXISTS idx_leadlag_date ON lead_lag_features (execution_date);
 
 -- Vue analytique : corrélation quotidienne BTC ↔ NASDAQ
 CREATE OR REPLACE VIEW v_btc_ndaq_correlation AS
 SELECT
     execution_date,
-    COUNT(*)                          AS record_count,
-    CORR(btc_return_1m, ndaq_return_1m) AS correlation_1m,
-    AVG(btc_return_1m)                AS avg_btc_return,
-    AVG(ndaq_return_1m)               AS avg_ndaq_return
+    COUNT(*)                              AS record_count,
+    CORR(btc_return_1m, ndaq_return_1m)  AS correlation_1m,
+    AVG(btc_return_1m)                    AS avg_btc_return,
+    AVG(ndaq_return_1m)                   AS avg_ndaq_return,
+    STDDEV(btc_return_1m)                 AS stddev_btc_return,
+    STDDEV(ndaq_return_1m)                AS stddev_ndaq_return
 FROM lead_lag_features
 WHERE btc_return_1m IS NOT NULL
   AND ndaq_return_1m IS NOT NULL
 GROUP BY execution_date
 ORDER BY execution_date DESC;
+```
+
+---
+
+### Code — Chargement PostgreSQL (`src/postgres/load.py`)
+
+> **Modifications apportées :** trois bugs successifs corrigés :
+> 1. **Intersection des colonnes** : évite les erreurs sur les colonnes auto-générées (`id SERIAL`, `loaded_at_utc DEFAULT`)
+> 2. **Type-cast automatique** : convertit les colonnes texte du staging en `DATE` ou `TIMESTAMPTZ` selon le type cible
+> 3. **DISTINCT ON** : déduplique les lignes avant l'`INSERT` pour éviter `CardinalityViolation` sur la contrainte `UNIQUE`
+
+```python
+# src/postgres/load.py (extrait — fonction load_data)
+
+def load_data(filepath: str, table_name: str) -> None:
+    # ... connexion via variables d'environnement ...
+
+    staging_table = f"_staging_{table_name}_{uuid.uuid4().hex[:8]}"
+
+    with engine.begin() as conn:
+        df.to_sql(staging_table, conn, index=False, if_exists="replace", method="multi")
+
+        inspector = inspect(conn)
+
+        # ── 1. Colonnes communes staging ∩ table cible ───────────────────────
+        # Exclut les colonnes auto-générées absentes du parquet (id, loaded_at_utc)
+        target_col_infos = inspector.get_columns(table_name)
+        target_cols      = [c["name"] for c in target_col_infos]
+        staging_col_names = {c["name"] for c in inspector.get_columns(staging_table)}
+        common_cols = [c for c in target_cols if c in staging_col_names]
+
+        # ── 2. Cast automatique DATE / TIMESTAMPTZ ───────────────────────────
+        # Parquet stocke les dates comme string → staging TEXT → cast explicite requis
+        type_cast = {}
+        for col_info in target_col_infos:
+            col_name = col_info["name"]
+            if col_name not in staging_col_names:
+                continue
+            type_str = str(col_info["type"]).upper()
+            if type_str == "DATE":
+                type_cast[col_name] = "::date"
+            elif "TIMESTAMP" in type_str:
+                type_cast[col_name] = "::timestamptz"
+
+        col_list    = ", ".join([f'"{c}"' for c in common_cols])
+        select_list = ", ".join([f't."{c}"{type_cast.get(c, "")}' for c in common_cols])
+
+        # ── 3. Résolution du conflit : PK puis contrainte UNIQUE ─────────────
+        pk      = inspector.get_pk_constraint(table_name)
+        pk_cols = [c for c in (pk.get("constrained_columns", []) if pk else [])
+                   if c in staging_col_names]
+
+        if not pk_cols:
+            for uc in inspector.get_unique_constraints(table_name):
+                uc_cols = uc.get("column_names", [])
+                if all(c in staging_col_names for c in uc_cols):
+                    pk_cols = uc_cols
+                    break
+
+        if pk_cols:
+            # DISTINCT ON déduplique avant l'INSERT (évite CardinalityViolation)
+            distinct_on     = ", ".join([f't."{c}"' for c in pk_cols])
+            order_by        = ", ".join([f't."{c}"' for c in pk_cols])
+            conflict_target = ", ".join([f'"{c}"' for c in pk_cols])
+            update_cols     = [c for c in common_cols if c not in pk_cols]
+            update_set      = ", ".join([f'"{c}" = EXCLUDED."{c}"' for c in update_cols])
+
+            sql = (
+                f'INSERT INTO "{table_name}" ({col_list}) '
+                f'SELECT DISTINCT ON ({distinct_on}) {select_list} '
+                f'FROM "{staging_table}" t '
+                f'ORDER BY {order_by} '
+                f'ON CONFLICT ({conflict_target}) DO UPDATE SET {update_set};'
+            )
+
+        conn.execute(text(sql))
+        conn.execute(text(f'DROP TABLE IF EXISTS "{staging_table}"'))
 ```
 
 ---
@@ -599,8 +922,8 @@ with source as (
 
 final as (
     select
-        cast(ts_minute_utc  as timestamp)       as ts_minute_utc,
-        cast(execution_date as date)            as dt,
+        cast(ts_minute_utc  as timestamp) as ts_minute_utc,
+        cast(execution_date as date)      as dt,
 
         -- BTC
         cast(btc_high        as double precision) as btc_high,
@@ -611,13 +934,14 @@ final as (
         cast(btc_close_lag_1 as double precision) as btc_close_lag_1,
         cast(btc_return_1m   as double precision) as btc_return_1m,
 
-        -- NASDAQ
+        -- NASDAQ (avec LOCF : ndaq_close non NULL 24/7)
         cast(ndaq_high        as double precision) as ndaq_high,
         cast(ndaq_low         as double precision) as ndaq_low,
         cast(ndaq_close       as double precision) as ndaq_close,
         cast(ndaq_volume      as double precision) as ndaq_volume,
         cast(ndaq_close_lag_1 as double precision) as ndaq_close_lag_1,
-        cast(ndaq_return_1m   as double precision) as ndaq_return_1m
+        cast(ndaq_return_1m   as double precision) as ndaq_return_1m,
+        ndaq_market_open
 
     from source
 )
@@ -627,13 +951,35 @@ select * from final
 
 ---
 
-### Code — Mart aligné (NASDAQ non NULL uniquement)
+### Code — Mart aligné (heures de trading uniquement)
 
 ```sql
 -- dbt/btc_nasdaq/models/marts/mart_btc_ndx_5m_aligned.sql
+-- Filtre sur ndaq_market_open pour ne garder que les instants avec vraies données NASDAQ
 
 select * from {{ ref('stg_btc_ndx_features_5m_dbt') }}
-where ndaq_close is not null   -- uniquement les instants pendant les heures de marché
+where ndaq_market_open = true   -- exclut les heures de fermeture (LOCF)
+```
+
+---
+
+### Requêtes de validation en production
+
+```sql
+-- Vérifier la complétude du LOCF (0 NULL attendu après J+1)
+SELECT
+    ndaq_market_open,
+    COUNT(*)                                           AS nb_lignes,
+    COUNT(ndaq_close)                                  AS ndaq_close_non_null,
+    COUNT(*) FILTER (WHERE ndaq_return_1m IS NULL)     AS nulls_return
+FROM lead_lag_features
+WHERE execution_date = CURRENT_DATE
+GROUP BY ndaq_market_open;
+
+-- Résultat attendu :
+-- ndaq_market_open=TRUE  → vraies variations NASDAQ (±0.01% à ±0.5%)
+-- ndaq_market_open=FALSE → return ≈ 0.0% (prix constant via LOCF)
+-- nulls_return = 0 dans les deux cas
 ```
 
 ---
@@ -670,7 +1016,7 @@ from elasticsearch import Elasticsearch, helpers
 
 # ── Connexion Elasticsearch ──────────────────────────────────────────────────
 # Priorité 1 : endpoint cloud (ELK_ENDPOINT + API key)
-# Priorité 2 : instance locale Docker (ELASTICSEARCH_HOST:PORT)
+# Priorité 2 : instance locale Docker (variables d'environnement .env)
 ELK_ENDPOINT = os.getenv("ELK_ENDPOINT")
 ES_HOST      = os.getenv("ELASTICSEARCH_HOST", "elasticsearch")
 ES_PORT      = os.getenv("ELASTICSEARCH_PORT", "9200")
@@ -691,7 +1037,6 @@ def generate_docs(df: pd.DataFrame):
     for _, row in df.iterrows():
         doc = row.to_dict()
         _id = doc["ts_minute_utc"].strftime("%Y-%m-%d %H:%M:%S")
-        # Conversion des types Python → JSON-compatibles
         for key, value in doc.items():
             if isinstance(value, pd.Timestamp):
                 doc[key] = value.isoformat()
@@ -700,25 +1045,15 @@ def generate_docs(df: pd.DataFrame):
         yield {"_id": _id, "_source": doc}
 
 def elk_index(file_path: Path):
-    """
-    Lit un fichier Parquet et l'indexe en bulk dans Elasticsearch.
-    Crée _ELKSUCCESS après indexation réussie (partitions passées uniquement).
-    """
     df = pq.read_table(file_path).to_pandas()
     df.drop_duplicates(subset="ts_minute_utc", inplace=True)
-
     success, _ = helpers.bulk(client, generate_docs(df), index=ELK_INDEX)
     print(f"{success} documents indexés depuis {file_path}")
-
-    # Marqueur d'idempotence (pas créé pour les données du jour)
-    date_str = file_path.parent.name  # dt=YYYY-MM-DD
+    date_str = file_path.parent.name
     if date_str != f"dt={pd.Timestamp.now().date()}":
         (file_path.parent / "_ELKSUCCESS").touch()
 
 def main():
-    """
-    Parcourt toutes les partitions non encore indexées et les envoie à ES.
-    """
     folders = glob(USAGE_DATA + "dt=*")
     for folder in folders:
         if not (Path(folder) / "_ELKSUCCESS").exists():
@@ -734,14 +1069,15 @@ def main():
   "finance": {
     "mappings": {
       "properties": {
-        "ts_minute_utc":    { "type": "date" },
-        "execution_date":   { "type": "date" },
-        "btc_close":        { "type": "float" },
-        "btc_return_1m":    { "type": "float" },
-        "btc_close_lag_1":  { "type": "float" },
-        "btc_close_lead_1": { "type": "float" },
-        "ndaq_close":       { "type": "float" },
-        "ndaq_return_1m":   { "type": "float" }
+        "ts_minute_utc":     { "type": "date" },
+        "execution_date":    { "type": "date" },
+        "btc_close":         { "type": "float" },
+        "btc_return_1m":     { "type": "float" },
+        "btc_close_lag_1":   { "type": "float" },
+        "btc_close_lead_1":  { "type": "float" },
+        "ndaq_close":        { "type": "float" },
+        "ndaq_return_1m":    { "type": "float" },
+        "ndaq_market_open":  { "type": "boolean" }
       }
     }
   }
@@ -806,7 +1142,7 @@ corrélation BTC/NASDAQ, prix en temps réel, volumes, rendements.
       }
     },
     "tooltip": [
-      { "field": "btc_return",  "title": "BTC Return (%)",   "format": ".4f" },
+      { "field": "btc_return",  "title": "BTC Return (%)",    "format": ".4f" },
       { "field": "ndaq_return", "title": "NASDAQ Return (%)", "format": ".4f" },
       { "field": "quadrant",    "title": "Signal" }
     ]
@@ -818,16 +1154,32 @@ corrélation BTC/NASDAQ, prix en temps réel, volumes, rendements.
 
 ### Dashboards recommandés
 
-| Visualisation | Type Kibana | Champs utilisés |
-|---|---|---|
-| Prix BTC + NASDAQ | Line (double axe) | `btc_close`, `ndaq_close` |
-| Returns 1m | Area | `btc_return_1m`, `ndaq_return_1m` |
-| Corrélation | Vega scatter | `btc_return_1m`, `ndaq_return_1m` |
-| Volume | Vertical Bar | `btc_volume`, `ndaq_volume` |
-| Volatilité | Line (fill) | `btc_high`, `btc_low` |
-| Lead/Lag | Line (4 séries) | `btc_close`, `btc_close_lag_1`, `ndaq_close`, `ndaq_close_lead_1` |
-| KPI docs indexés | Metric | `Count` |
-| Table runs | Data Table | `ts_minute_utc` + métriques |
+| Visualisation     | Type Kibana        | Champs utilisés                                               |
+|-------------------|--------------------|---------------------------------------------------------------|
+| Prix BTC + NASDAQ | Line (double axe)  | `btc_close`, `ndaq_close`                                     |
+| Returns 1m        | Area               | `btc_return_1m`, `ndaq_return_1m`                             |
+| Corrélation       | Vega scatter       | `btc_return_1m`, `ndaq_return_1m`                             |
+| Volume            | Vertical Bar       | `btc_volume`, `ndaq_volume`                                   |
+| Volatilité        | Line (fill)        | `btc_high`, `btc_low`                                         |
+| Lead/Lag          | Line (4 séries)    | `btc_close`, `btc_close_lag_1`, `ndaq_close`, `ndaq_close_lead_1` |
+| Heures de trading | Filter KQL         | `ndaq_market_open: true`                                      |
+| KPI docs indexés  | Metric             | `Count`                                                       |
+| Table runs        | Data Table         | `ts_minute_utc` + métriques                                   |
+
+---
+---
+
+## Résumé des modifications apportées
+
+| # | Fichier | Modification | Raison |
+|---|---------|-------------|--------|
+| 1 | `docker/.env` + `docker/.env.example` | Externalisation de tous les secrets | Sécurité : aucun credential dans le code |
+| 2 | `dbt/btc_nasdaq/profiles.yml` | `env_var()` au lieu de valeurs en dur | Cohérence avec la politique .env |
+| 3 | `dags/main_pipeline_dag.py` | `t_dbt_run` reconnecté + table `"lead_lag_features"` | `t_dbt_run` était orphelin ; mauvais nom de table |
+| 4 | `src/postgres/load.py` | Intersection colonnes + type-cast + DISTINCT ON | `DatatypeMismatch` + `CardinalityViolation` résolus |
+| 5 | `docker/init-warehouse.sql` | Ajout `ndaq_market_open BOOLEAN` | Distinguer heures réelles vs LOCF |
+| 6 | `src/spark_jobs/combination/features_lead_lag_spark.py` | LOCF intra-day + LOCF cross-day (graine J-1) | Éliminer les NULLs NASDAQ hors heures de marché |
+| 7 | `dbt/btc_nasdaq/models/` | `ndaq_market_open` dans staging ; filtre `= true` dans mart aligné | Exposer le flag LOCF aux analyses dbt |
 
 ---
 
