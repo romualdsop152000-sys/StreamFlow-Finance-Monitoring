@@ -124,19 +124,28 @@ def load_data(filepath: str, table_name: str) -> None:
 					break
 
 		if pk_cols:
+			# DISTINCT ON deduplicates rows that share the same conflict key
+			# within the same INSERT batch (PostgreSQL rejects duplicate conflict
+			# targets in a single ON CONFLICT DO UPDATE statement).
+			distinct_on  = ", ".join([f't."{c}"' for c in pk_cols])
+			order_by     = ", ".join([f't."{c}"' for c in pk_cols])
 			conflict_target = ", ".join([f'"{c}"' for c in pk_cols])
 			update_cols = [c for c in common_cols if c not in pk_cols]
 			if update_cols:
 				update_set = ", ".join([f'"{c}" = EXCLUDED."{c}"' for c in update_cols])
 				sql = (
 					f'INSERT INTO "{table_name}" ({col_list}) '
-					f'SELECT {select_list} FROM "{staging_table}" t '
+					f'SELECT DISTINCT ON ({distinct_on}) {select_list} '
+					f'FROM "{staging_table}" t '
+					f'ORDER BY {order_by} '
 					f'ON CONFLICT ({conflict_target}) DO UPDATE SET {update_set};'
 				)
 			else:
 				sql = (
 					f'INSERT INTO "{table_name}" ({col_list}) '
-					f'SELECT {select_list} FROM "{staging_table}" t '
+					f'SELECT DISTINCT ON ({distinct_on}) {select_list} '
+					f'FROM "{staging_table}" t '
+					f'ORDER BY {order_by} '
 					f'ON CONFLICT ({conflict_target}) DO NOTHING;'
 				)
 		else:
