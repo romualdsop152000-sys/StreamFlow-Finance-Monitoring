@@ -78,19 +78,33 @@ def main(execution_date: str, max_lag_minutes: int = 5):
                 F.col("low").alias("ndaq_low")
             )
             
-            # Joindre BTC et NASDAQ
+            # Joindre BTC et NASDAQ (LEFT JOIN : NULLs hors heures de marché)
             joined = btc_renamed.join(ndaq_renamed, on="ts_minute_utc", how="left")
             print(f"[INFO] Joined records: {joined.count()}")
+
+            # Marquer les heures d'ouverture NASDAQ AVANT la forward-fill
+            joined = joined.withColumn("ndaq_market_open", F.col("ndaq_close").isNotNull())
+
+            # Forward-fill : propager le dernier prix connu pendant la fermeture
+            # (price stays constant → ndaq_return_1m = 0% hors marché, sémantiquement correct)
+            window_ffill = Window.orderBy("ts_minute_utc").rowsBetween(Window.unboundedPreceding, 0)
+            for ndaq_col in ["ndaq_close", "ndaq_volume", "ndaq_high", "ndaq_low"]:
+                joined = joined.withColumn(
+                    ndaq_col,
+                    F.last(F.col(ndaq_col), ignorenulls=True).over(window_ffill)
+                )
+            print(f"[INFO] NASDAQ forward-fill applied")
         else:
             has_ndaq = False
-    
+
     if not has_ndaq:
         print(f"[WARNING] NASDAQ data not found or empty, using BTC only")
         joined = btc_renamed \
             .withColumn("ndaq_close", F.lit(None).cast("double")) \
             .withColumn("ndaq_volume", F.lit(None).cast("double")) \
             .withColumn("ndaq_high", F.lit(None).cast("double")) \
-            .withColumn("ndaq_low", F.lit(None).cast("double"))
+            .withColumn("ndaq_low", F.lit(None).cast("double")) \
+            .withColumn("ndaq_market_open", F.lit(False))
 
     # Créer les features lead-lag
     window_spec = Window.orderBy("ts_minute_utc")

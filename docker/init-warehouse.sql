@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS lead_lag_features (
     ndaq_high DOUBLE PRECISION,
     ndaq_low DOUBLE PRECISION,
     ndaq_return_1m DOUBLE PRECISION,
+    ndaq_market_open BOOLEAN,          -- TRUE pendant les heures de trading (14h30-21h00 UTC)
     
     -- Lag features BTC
     btc_close_lag_1 DOUBLE PRECISION,
