@@ -88,12 +88,27 @@ def load_data(filepath: str, table_name: str) -> None:
 		# Get columns present in both the target table and the staging (DataFrame) table.
 		# This excludes auto-generated columns (SERIAL id, DEFAULT timestamps) that are
 		# not present in the parquet and would cause "column does not exist" errors.
-		target_cols = [c["name"] for c in inspector.get_columns(table_name)]
+		target_col_infos = inspector.get_columns(table_name)
+		target_cols = [c["name"] for c in target_col_infos]
 		staging_col_names = {c["name"] for c in inspector.get_columns(staging_table)}
 		common_cols = [c for c in target_cols if c in staging_col_names]
 
+		# Build type-cast map: when the staging table stores a value as text but the
+		# target column is DATE or TIMESTAMP, add an explicit PostgreSQL cast so that
+		# the INSERT does not fail with DatatypeMismatch.
+		type_cast = {}
+		for col_info in target_col_infos:
+			col_name = col_info["name"]
+			if col_name not in staging_col_names:
+				continue
+			type_str = str(col_info["type"]).upper()
+			if type_str == "DATE":
+				type_cast[col_name] = "::date"
+			elif "TIMESTAMP" in type_str:
+				type_cast[col_name] = "::timestamptz"
+
 		col_list = ", ".join([f'"{c}"' for c in common_cols])
-		select_list = ", ".join([f't."{c}"' for c in common_cols])
+		select_list = ", ".join([f't."{c}"{type_cast.get(c, "")}' for c in common_cols])
 
 		# Determine conflict target: prefer PK columns present in staging,
 		# then fall back to UNIQUE constraints fully present in staging.
