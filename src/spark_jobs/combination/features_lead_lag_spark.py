@@ -1,5 +1,6 @@
 import argparse
 import os
+from datetime import datetime, timedelta
 import pyarrow as pa
 import pyarrow.parquet as pq
 from pyspark.sql import SparkSession
@@ -63,48 +64,96 @@ def main(execution_date: str, max_lag_minutes: int = 5):
 
     # Vérifier si NASDAQ existe
     has_ndaq = os.path.exists(ndaq_path)
-    
+
+    # LOCF cross-day : chercher une "graine" dans J-1 pour seeder le forward-fill
+    # quand le marché n'a pas encore ouvert sur la journée en cours
+    prev_date = (datetime.strptime(execution_date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    prev_ndaq_path = f"data/formatted/market/yfinance/nasdaq_100/dt={prev_date}"
+    seed_row = None
+    if os.path.exists(prev_ndaq_path):
+        prev_ndaq = spark.read.parquet(prev_ndaq_path)
+        if prev_ndaq.count() > 0:
+            seed_row = prev_ndaq.orderBy(F.col("ts_minute_utc").desc()).limit(1).select(
+                F.col("ts_minute_utc"),
+                F.col("close").alias("ndaq_close"),
+                F.col("volume").alias("ndaq_volume"),
+                F.col("high").alias("ndaq_high"),
+                F.col("low").alias("ndaq_low"),
+                F.lit(True).alias("_is_seed"),
+            )
+            print(f"[INFO] LOCF seed loaded from {prev_ndaq_path}")
+
     if has_ndaq:
         ndaq = spark.read.parquet(ndaq_path)
         ndaq_count = ndaq.count()
         print(f"[INFO] NASDAQ records: {ndaq_count}")
-        
+
         if ndaq_count > 0:
             ndaq_renamed = ndaq.select(
                 F.col("ts_minute_utc"),
                 F.col("close").alias("ndaq_close"),
                 F.col("volume").alias("ndaq_volume"),
                 F.col("high").alias("ndaq_high"),
-                F.col("low").alias("ndaq_low")
+                F.col("low").alias("ndaq_low"),
+                F.lit(False).alias("_is_seed"),
             )
-            
-            # Joindre BTC et NASDAQ (LEFT JOIN : NULLs hors heures de marché)
-            joined = btc_renamed.join(ndaq_renamed, on="ts_minute_utc", how="left")
-            print(f"[INFO] Joined records: {joined.count()}")
-
-            # Marquer les heures d'ouverture NASDAQ AVANT la forward-fill
-            joined = joined.withColumn("ndaq_market_open", F.col("ndaq_close").isNotNull())
-
-            # Forward-fill : propager le dernier prix connu pendant la fermeture
-            # (price stays constant → ndaq_return_1m = 0% hors marché, sémantiquement correct)
-            window_ffill = Window.orderBy("ts_minute_utc").rowsBetween(Window.unboundedPreceding, 0)
-            for ndaq_col in ["ndaq_close", "ndaq_volume", "ndaq_high", "ndaq_low"]:
-                joined = joined.withColumn(
-                    ndaq_col,
-                    F.last(F.col(ndaq_col), ignorenulls=True).over(window_ffill)
-                )
-            print(f"[INFO] NASDAQ forward-fill applied")
         else:
             has_ndaq = False
 
+    if has_ndaq:
+        # Préfixer la graine J-1 pour que le ffill parte d'une valeur connue
+        if seed_row is not None:
+            ndaq_renamed = seed_row.union(ndaq_renamed)
+
+        # Joindre BTC et NASDAQ (LEFT JOIN : NULLs hors heures de marché)
+        joined = btc_renamed.join(
+            ndaq_renamed.drop("_is_seed"), on="ts_minute_utc", how="left"
+        )
+        # Conserver le flag de graine avant le drop pour l'utiliser après
+        joined = joined.join(
+            ndaq_renamed.select("ts_minute_utc", "_is_seed"), on="ts_minute_utc", how="left"
+        )
+        print(f"[INFO] Joined records (incl. seed): {joined.count()}")
+
+        # Marquer les heures d'ouverture NASDAQ AVANT la forward-fill
+        joined = joined.withColumn("ndaq_market_open", F.col("ndaq_close").isNotNull())
+
+        # LOCF : propager le dernier prix connu (cross-day grâce à la graine J-1)
+        window_ffill = Window.orderBy("ts_minute_utc").rowsBetween(Window.unboundedPreceding, 0)
+        for ndaq_col in ["ndaq_close", "ndaq_volume", "ndaq_high", "ndaq_low"]:
+            joined = joined.withColumn(
+                ndaq_col,
+                F.last(F.col(ndaq_col), ignorenulls=True).over(window_ffill)
+            )
+        print(f"[INFO] NASDAQ LOCF (cross-day) applied")
+
+        # Supprimer la ligne graine J-1 du résultat final
+        joined = joined.filter(F.col("_is_seed").isNull() | ~F.col("_is_seed"))
+        joined = joined.drop("_is_seed")
+
     if not has_ndaq:
-        print(f"[WARNING] NASDAQ data not found or empty, using BTC only")
-        joined = btc_renamed \
-            .withColumn("ndaq_close", F.lit(None).cast("double")) \
-            .withColumn("ndaq_volume", F.lit(None).cast("double")) \
-            .withColumn("ndaq_high", F.lit(None).cast("double")) \
-            .withColumn("ndaq_low", F.lit(None).cast("double")) \
-            .withColumn("ndaq_market_open", F.lit(False))
+        print(f"[WARNING] NASDAQ data not found or empty for {execution_date}")
+        # Appliquer quand même la graine J-1 si disponible (LOCF pur)
+        if seed_row is not None:
+            seed_pd = seed_row.drop("_is_seed").toPandas()
+            seed_close = float(seed_pd["ndaq_close"].iloc[0])
+            seed_volume = float(seed_pd["ndaq_volume"].iloc[0])
+            seed_high = float(seed_pd["ndaq_high"].iloc[0])
+            seed_low = float(seed_pd["ndaq_low"].iloc[0])
+            print(f"[INFO] LOCF from J-1: ndaq_close={seed_close:.2f}")
+            joined = btc_renamed \
+                .withColumn("ndaq_close", F.lit(seed_close).cast("double")) \
+                .withColumn("ndaq_volume", F.lit(seed_volume).cast("double")) \
+                .withColumn("ndaq_high", F.lit(seed_high).cast("double")) \
+                .withColumn("ndaq_low", F.lit(seed_low).cast("double")) \
+                .withColumn("ndaq_market_open", F.lit(False))
+        else:
+            joined = btc_renamed \
+                .withColumn("ndaq_close", F.lit(None).cast("double")) \
+                .withColumn("ndaq_volume", F.lit(None).cast("double")) \
+                .withColumn("ndaq_high", F.lit(None).cast("double")) \
+                .withColumn("ndaq_low", F.lit(None).cast("double")) \
+                .withColumn("ndaq_market_open", F.lit(False))
 
     # Créer les features lead-lag
     window_spec = Window.orderBy("ts_minute_utc")
