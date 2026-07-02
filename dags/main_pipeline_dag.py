@@ -110,9 +110,9 @@ with DAG(
     )
 
     t_export_pg = PythonOperator(
-    task_id="load_data_into_postgres",
-    python_callable=load_data_in_postgres,
-    op_args=[BTC_NASDAQ_USAGE_DATA_PATH, "btc_nasdaq"],
+        task_id="load_data_into_postgres",
+        python_callable=load_data_in_postgres,
+        op_args=[BTC_NASDAQ_USAGE_DATA_PATH, "lead_lag_features"],
     )
 
     # ========== 5) dbt : build marts + tests qualité ==========

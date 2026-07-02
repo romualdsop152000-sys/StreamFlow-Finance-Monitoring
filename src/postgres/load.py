@@ -85,34 +85,49 @@ def load_data(filepath: str, table_name: str) -> None:
 			conn.execute(text(f'DROP TABLE IF EXISTS "{staging_table}"'))
 			return
 
-		# Get column list for the target table
-		columns_info = inspector.get_columns(table_name)
-		target_cols = [c["name"] for c in columns_info]
+		# Get columns present in both the target table and the staging (DataFrame) table.
+		# This excludes auto-generated columns (SERIAL id, DEFAULT timestamps) that are
+		# not present in the parquet and would cause "column does not exist" errors.
+		target_cols = [c["name"] for c in inspector.get_columns(table_name)]
+		staging_col_names = {c["name"] for c in inspector.get_columns(staging_table)}
+		common_cols = [c for c in target_cols if c in staging_col_names]
 
-		# Get primary key columns (may be empty)
+		col_list = ", ".join([f'"{c}"' for c in common_cols])
+		select_list = ", ".join([f't."{c}"' for c in common_cols])
+
+		# Determine conflict target: prefer PK columns present in staging,
+		# then fall back to UNIQUE constraints fully present in staging.
 		pk = inspector.get_pk_constraint(table_name)
-		pk_cols = pk.get("constrained_columns", []) if pk else []
+		pk_cols = [c for c in (pk.get("constrained_columns", []) if pk else [])
+		           if c in staging_col_names]
 
-		col_list = ", ".join([f'"{c}"' for c in target_cols])
-		# When selecting from the staging table we must qualify columns with its alias
-		select_list = ", ".join([f't."{c}"' for c in target_cols])
+		if not pk_cols:
+			for uc in inspector.get_unique_constraints(table_name):
+				uc_cols = uc.get("column_names", [])
+				if all(c in staging_col_names for c in uc_cols):
+					pk_cols = uc_cols
+					break
 
 		if pk_cols:
 			conflict_target = ", ".join([f'"{c}"' for c in pk_cols])
-			update_set = ", ".join(
-				[f'"{c}" = EXCLUDED."{c}"' for c in target_cols if c not in pk_cols]
-			) or "DO NOTHING"
-
-			sql = (
-				f'INSERT INTO "{table_name}" ({col_list}) '
-				f'SELECT {select_list} FROM "{staging_table}" t '
-				f'ON CONFLICT ({conflict_target}) DO UPDATE SET {update_set};'
-			)
+			update_cols = [c for c in common_cols if c not in pk_cols]
+			if update_cols:
+				update_set = ", ".join([f'"{c}" = EXCLUDED."{c}"' for c in update_cols])
+				sql = (
+					f'INSERT INTO "{table_name}" ({col_list}) '
+					f'SELECT {select_list} FROM "{staging_table}" t '
+					f'ON CONFLICT ({conflict_target}) DO UPDATE SET {update_set};'
+				)
+			else:
+				sql = (
+					f'INSERT INTO "{table_name}" ({col_list}) '
+					f'SELECT {select_list} FROM "{staging_table}" t '
+					f'ON CONFLICT ({conflict_target}) DO NOTHING;'
+				)
 		else:
-			# No primary key: insert rows from staging that do not already exist
-			# Match on all columns using IS NOT DISTINCT FROM to handle NULLs
+			# No conflict target: insert rows not already present (match on common cols)
 			match_conditions = " AND ".join(
-				[f't."{c}" IS NOT DISTINCT FROM u."{c}"' for c in target_cols]
+				[f't."{c}" IS NOT DISTINCT FROM u."{c}"' for c in common_cols]
 			)
 			sql = (
 				f'INSERT INTO "{table_name}" ({col_list}) '
