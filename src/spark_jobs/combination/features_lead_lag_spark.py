@@ -101,24 +101,35 @@ def main(execution_date: str, max_lag_minutes: int = 5):
             has_ndaq = False
 
     if has_ndaq:
-        # Préfixer la graine J-1 pour que le ffill parte d'une valeur connue
-        if seed_row is not None:
-            ndaq_renamed = seed_row.union(ndaq_renamed)
-
-        # Joindre BTC et NASDAQ (LEFT JOIN : NULLs hors heures de marché)
-        joined = btc_renamed.join(
-            ndaq_renamed.drop("_is_seed"), on="ts_minute_utc", how="left"
-        )
-        # Conserver le flag de graine avant le drop pour l'utiliser après
-        joined = joined.join(
-            ndaq_renamed.select("ts_minute_utc", "_is_seed"), on="ts_minute_utc", how="left"
-        )
-        print(f"[INFO] Joined records (incl. seed): {joined.count()}")
+        # LEFT JOIN sur le timestamp : NULLs pour les heures hors marché
+        joined = btc_renamed.join(ndaq_renamed.drop("_is_seed"), on="ts_minute_utc", how="left")
+        print(f"[INFO] Joined records: {joined.count()}")
 
         # Marquer les heures d'ouverture NASDAQ AVANT la forward-fill
         joined = joined.withColumn("ndaq_market_open", F.col("ndaq_close").isNotNull())
 
-        # LOCF : propager le dernier prix connu (cross-day grâce à la graine J-1)
+        # Injecter la graine J-1 sur le PREMIER enregistrement pour amorcer le LOCF.
+        # Le LEFT JOIN ne peut pas inclure le timestamp J-1 (hors plage BTC d'aujourd'hui),
+        # donc on injecte les valeurs directement sur la première ligne NULL.
+        if seed_row is not None:
+            seed_vals = seed_row.first()
+            min_ts = joined.agg(F.min("ts_minute_utc")).first()[0]
+            for col_name, seed_val in [
+                ("ndaq_close",  float(seed_vals["ndaq_close"])),
+                ("ndaq_volume", float(seed_vals["ndaq_volume"])),
+                ("ndaq_high",   float(seed_vals["ndaq_high"])),
+                ("ndaq_low",    float(seed_vals["ndaq_low"])),
+            ]:
+                joined = joined.withColumn(
+                    col_name,
+                    F.when(
+                        (F.col("ts_minute_utc") == F.lit(min_ts)) & F.col(col_name).isNull(),
+                        F.lit(seed_val)
+                    ).otherwise(F.col(col_name))
+                )
+            print(f"[INFO] LOCF seed injected at first row ({min_ts})")
+
+        # LOCF : propager depuis la graine vers toutes les lignes NULL suivantes
         window_ffill = Window.orderBy("ts_minute_utc").rowsBetween(Window.unboundedPreceding, 0)
         for ndaq_col in ["ndaq_close", "ndaq_volume", "ndaq_high", "ndaq_low"]:
             joined = joined.withColumn(
@@ -126,10 +137,6 @@ def main(execution_date: str, max_lag_minutes: int = 5):
                 F.last(F.col(ndaq_col), ignorenulls=True).over(window_ffill)
             )
         print(f"[INFO] NASDAQ LOCF (cross-day) applied")
-
-        # Supprimer la ligne graine J-1 du résultat final
-        joined = joined.filter(F.col("_is_seed").isNull() | ~F.col("_is_seed"))
-        joined = joined.drop("_is_seed")
 
     if not has_ndaq:
         print(f"[WARNING] NASDAQ data not found or empty for {execution_date}")
