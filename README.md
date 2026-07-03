@@ -322,7 +322,3 @@ pytest --cov=src --cov-report=html
 
 ---
 
-## Cours
-
-DATA705 — Bases de données non relationnelles / Data Lake  
-Programme P2 — 2025/2026
